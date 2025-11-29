@@ -106,7 +106,6 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
     return (
       <div className="card">
         <div style={{ textAlign: 'center', padding: '40px' }}>
-          <div style={{ fontSize: '40px', marginBottom: '10px' }}>⏳</div>
           <p>Alıcılar yükleniyor...</p>
         </div>
       </div>
@@ -138,7 +137,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
         marginBottom: '20px' 
       }}>
         <h2 style={{ margin: 0, color: '#667eea' }}>
-          {showVerifiedOnly ? '✅ Doğrulanmış Alıcılar' : '👥 Tüm Alıcılar'}
+          {showVerifiedOnly ? 'Doğrulanmış Alıcılar' : 'Tüm Alıcılar'}
         </h2>
         <button
           onClick={loadRecipients}
@@ -163,7 +162,6 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
           background: '#f8f9fa',
           borderRadius: '12px',
         }}>
-          <div style={{ fontSize: '50px', marginBottom: '10px' }}>🔍</div>
           <p style={{ color: '#6c757d', margin: 0 }}>
             {showVerifiedOnly 
               ? 'Henüz doğrulanmış alıcı bulunmuyor'

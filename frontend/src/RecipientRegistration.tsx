@@ -79,22 +79,7 @@ export function RecipientRegistration() {
 
   return (
     <div className="card">
-      <h2 style={{ marginBottom: '20px', color: '#667eea' }}>
-        🙏 Yardım Alıcısı Olarak Kayıt Ol
-      </h2>
-      
-      <div style={{ 
-        background: '#e8f4f8', 
-        border: '1px solid #4a90e2',
-        borderRadius: '8px',
-        padding: '15px',
-        marginBottom: '20px'
-      }}>
-        <p style={{ margin: 0, fontSize: '14px', color: '#2c5aa0' }}>
-          ℹ️ Kayıt olduktan sonra STK tarafından profiliniz doğrulanacak. 
-          Doğrulama sonrası bağışçılar size yardım gönderebilir.
-        </p>
-      </div>
+      <h2>Yardım Alıcısı Kaydı</h2>
 
       <form onSubmit={handleRegister}>
         <div style={{ marginBottom: '15px' }}>
@@ -153,12 +138,12 @@ export function RecipientRegistration() {
             }}
             disabled={isSubmitting}
           >
-            <option value="Gıda">🍞 Gıda</option>
-            <option value="Giyim">👕 Giyim</option>
-            <option value="Barınma">🏠 Barınma</option>
-            <option value="Sağlık">💊 Sağlık</option>
-            <option value="Eğitim">📚 Eğitim</option>
-            <option value="Diğer">📦 Diğer</option>
+            <option value="Gıda">Gıda</option>
+            <option value="Giyim">Giyim</option>
+            <option value="Barınma">Barınma</option>
+            <option value="Sağlık">Sağlık</option>
+            <option value="Eğitim">Eğitim</option>
+            <option value="Diğer">Diğer</option>
           </select>
         </div>
 
@@ -172,7 +157,7 @@ export function RecipientRegistration() {
             cursor: isSubmitting ? 'not-allowed' : 'pointer',
           }}
         >
-          {isSubmitting ? '⏳ Kaydediliyor...' : '📝 Kayıt Ol'}
+          {isSubmitting ? 'Kaydediliyor...' : 'Kayıt Ol'}
         </button>
 
         {message && (

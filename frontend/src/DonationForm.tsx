@@ -175,7 +175,7 @@ export function DonationForm() {
           }}>
             <div>
               <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-                ✅ {selectedRecipientName}
+                {selectedRecipientName}
               </div>
               <div style={{ fontSize: '12px', color: '#155724' }}>
                 {selectedRecipient.slice(0, 8)}...{selectedRecipient.slice(-6)}
@@ -214,7 +214,7 @@ export function DonationForm() {
               fontWeight: '500',
             }}
           >
-            👥 Alıcı Seç
+            Alıcı Seç
           </button>
         )}
       </div>
