@@ -1,5 +1,5 @@
 // src/buildDonateTx.ts
-import { TransactionBlock } from '@mysten/sui/transactions';
+import { Transaction } from '@mysten/sui/transactions';
 import { AIDCHAIN_PACKAGE_ID, AIDCHAIN_REGISTRY_ID } from './config';
 
 export function buildDonateTx(
@@ -7,13 +7,13 @@ export function buildDonateTx(
   location: string,
   amountSui: number,
 ) {
-  const txb = new TransactionBlock();
+  const txb = new Transaction();
 
   // SUI → MIST (10^9)
   const amountMist = BigInt(Math.floor(amountSui * 1_000_000_000));
 
   // Bağışçıdan amountMist kadar SUI ayır
-  const [donationCoin] = txb.splitCoins(txb.gas, [txb.pure(amountMist)]);
+  const [donationCoin] = txb.splitCoins(txb.gas, [txb.pure.u64(amountMist)]);
 
   // aidchain::donate çağrısı
   txb.moveCall({

@@ -28,6 +28,7 @@ module aidchain::aidchain {
     /// Tekil bir yardım paketi
     /// Walrus entegrasyonu:
     /// - proof_url: Teslim anındaki fotoğraf / imzalı form gibi kanıtın Walrus URL'si
+    /// Escrow: Bağış bu pakette kilitli kalır, teslim edilince coordinatora aktarılır
     public struct AidPackage has key {
         id: object::UID,
         /// Bağışçının adresi
@@ -50,6 +51,8 @@ module aidchain::aidchain {
         updated_at_epoch: u64,
         /// Bağış tutarı (Mist cinsinden)
         donation_amount: u64,
+        /// ESCROW: Bağış pakette kilitli - sadece teslimde serbest bırakılır
+        locked_donation: option::Option<coin::Coin<SUI>>,
     }
 
     /// Statü değişim event'i – zincirde izleme için
@@ -81,8 +84,8 @@ module aidchain::aidchain {
     }
 
     /// Yeni yardım paketi + gerçek SUI bağışı
-    /// - donation: Coin<SUI> on-chain bağış
-    /// - donation_amount: bağışın Mist cinsinden miktarı
+    /// - donation: Coin<SUI> on-chain bağış - PAKETTE KİLİTLİ KALIR
+    /// - Sadece teslim edildiğinde coordinator'a aktarılır
     public entry fun donate(
         registry: &mut AidRegistry,
         description: string::String,
@@ -107,6 +110,7 @@ module aidchain::aidchain {
             created_at_epoch: now,
             updated_at_epoch: now,
             donation_amount: amount,
+            locked_donation: option::some(donation), // ESCROW: Bağış pakette kilitli
         };
 
         let package_id = object::id(&package);
@@ -114,10 +118,8 @@ module aidchain::aidchain {
         // Registry'ye paketin ID'sini ekle
         vector::push_back(&mut registry.packages, package_id);
 
-        // Bağış coin'ini admin cüzdanına gönder (STK / Organizasyon)
-        transfer::public_transfer(donation, registry.admin);
-
         // Paketi shared yap ki durum güncellenebilsin
+        // Bağış pakette kaldığı için güvende
         transfer::share_object(package);
     }
 
@@ -149,6 +151,7 @@ module aidchain::aidchain {
     }
 
     /// Teslim edildi + Walrus proof URL ile kaydet
+    /// ÖNEMLİ: Teslimde bağış coordinator'a aktarılır
     public entry fun mark_delivered(
         package: &mut AidPackage,
         proof_url: string::String,
@@ -163,6 +166,12 @@ module aidchain::aidchain {
         package.recipient = option::some(sender);
         package.proof_url = proof_url;
 
+        // ESCROW RELEASE: Bağış teslimde coordinator'a aktarılır
+        if (option::is_some(&package.locked_donation)) {
+            let donation = option::extract(&mut package.locked_donation);
+            transfer::public_transfer(donation, package.coordinator);
+        };
+
         let package_id = object::id(package);
 
         event::emit(AidStatusChanged {
@@ -171,5 +180,26 @@ module aidchain::aidchain {
             new_status: STATUS_DELIVERED,
             actor: sender,
         });
+    }
+
+    /// Bağışçı iade talep edebilir (örn: teslim edilemedi, iptal edildi)
+    /// Sadece bağışçı çağırabilir ve paket henüz teslim edilmemişse
+    public entry fun refund_to_donor(
+        package: &mut AidPackage,
+        ctx: &mut TxContext
+    ) {
+        let sender = tx_context::sender(ctx);
+        
+        // Sadece bağışçı iade alabilir
+        assert!(package.donor == sender, 3);
+        
+        // Paket henüz teslim edilmemişse iade edilebilir
+        assert!(package.status != STATUS_DELIVERED, 4);
+
+        // ESCROW REFUND: Bağış bağışçıya iade edilir
+        if (option::is_some(&package.locked_donation)) {
+            let donation = option::extract(&mut package.locked_donation);
+            transfer::public_transfer(donation, package.donor);
+        };
     }
 }

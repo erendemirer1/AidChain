@@ -2,13 +2,13 @@
 import { useState } from 'react';
 import {
   useCurrentAccount,
-  useSignAndExecuteTransactionBlock,
+  useSignAndExecuteTransaction,
 } from '@mysten/dapp-kit';
 import { buildDonateTx } from './buildDonateTx';
 
 export function DonationForm() {
   const account = useCurrentAccount();
-  const { mutate: signAndExecute } = useSignAndExecuteTransactionBlock();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
   const [description, setDescription] = useState(
     'Gıda Paketi - Konserve + Su',
@@ -39,46 +39,83 @@ export function DonationForm() {
 
     signAndExecute(
       {
-        transactionBlock: txb,
-        options: { showEffects: true },
+        transaction: txb,
       },
       {
-        onSuccess: (res) => {
+        onSuccess: (result: any) => {
           setLoading(false);
-          setTxDigest(res.digest ?? null);
-
-          const chainStatus = (res as any)?.effects?.status?.status;
-          const chainError = (res as any)?.effects?.status?.error;
-
-          if (chainStatus === 'success') {
-            setStatusMsg(
-              `✅ Bağış zincirde başarıyla işlendi! Tx digest: ${
-                res.digest ?? 'bilinmiyor'
-              }`,
-            );
-          } else if (chainStatus === 'failure') {
-            setStatusMsg(
-              `❌ İşlem zincirde başarısız oldu: ${
-                chainError ?? 'Bilinmeyen hata'
-              }`,
-            );
+          console.log('Transaction result:', result);
+          
+          if (!result.digest) {
+            setStatusMsg('❌ İşlem digest bilgisi alınamadı');
+            return;
+          }
+          
+          // ÖNEMLİ: Effects kontrolü - transaction gerçekten başarılı mı?
+          const effects = result.effects;
+          const executionStatus = effects?.status?.status;
+          
+          console.log('Execution status:', executionStatus);
+          console.log('Full effects:', effects);
+          
+          setTxDigest(result.digest);
+          
+          // Transaction başarısız olduysa
+          if (executionStatus === 'failure') {
+            const errorMsg = effects?.status?.error || 'Bilinmeyen hata';
+            console.error('Transaction failed:', errorMsg);
+            
+            // Yetersiz bakiye kontrolü
+            if (errorMsg.includes('InsufficientCoinBalance') || 
+                errorMsg.toLowerCase().includes('insufficient')) {
+              setStatusMsg('❌ Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.');
+            } else {
+              setStatusMsg(`❌ İşlem başarısız: ${errorMsg}`);
+            }
+            return;
+          }
+          
+          // Transaction başarılı
+          if (executionStatus === 'success') {
+            setStatusMsg('✅ Bağış başarıyla blockchain\'e kaydedildi!');
           } else {
-            setStatusMsg(
-              `ℹ️ İşlem gönderildi, ancak zincir durumu net değil. Tx digest: ${
-                res.digest ?? 'bilinmiyor'
-              }`,
-            );
+            // Status belirsiz
+            setStatusMsg(`⚠️ İşlem durumu belirsiz. Tx: ${result.digest}`);
           }
         },
-        onError: (err) => {
+        onError: (err: any) => {
           setLoading(false);
-          console.error(err);
-          setStatusMsg(
-            `❌ İşlem RPC / cüzdan aşamasında başarısız: ${
-              (err as Error).message ?? String(err)
-            }`,
-          );
-          alert('İşlem başarısız oldu, detay için konsola bak.');
+          console.error('Transaction error:', err);
+          
+          let errorMessage = '❌ ';
+          
+          // Hata mesajını analiz et
+          if (err?.message) {
+            errorMessage += err.message;
+          } else if (typeof err === 'string') {
+            errorMessage += err;
+          } else {
+            errorMessage += 'İşlem başarısız oldu';
+          }
+          
+          // Yetersiz bakiye kontrolü
+          if (errorMessage.toLowerCase().includes('insufficient') || 
+              errorMessage.toLowerCase().includes('balance')) {
+            errorMessage = '❌ Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.';
+          }
+          
+          // Kullanıcı iptal etti
+          if (errorMessage.toLowerCase().includes('rejected') || 
+              errorMessage.toLowerCase().includes('cancelled')) {
+            errorMessage = '❌ İşlem kullanıcı tarafından iptal edildi.';
+          }
+          
+          // Gas ücreti yetersiz
+          if (errorMessage.toLowerCase().includes('gas')) {
+            errorMessage = '❌ Gas ücreti için yetersiz bakiye.';
+          }
+          
+          setStatusMsg(errorMessage);
         },
       },
     );
