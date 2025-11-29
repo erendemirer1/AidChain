@@ -1,17 +1,28 @@
-<body>
-  <h1>AidChain – Afet Yardım Takip Sistemi</h1>
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AidChain – Afet Yardım Takip Sistemi</title>
+  </head>
+  <body>
+    <!-- React bağışçı dApp -->
+    <div id="donation-root"></div>
 
-  <div style="margin-bottom: 20px;">
+    <hr />
+
+    <!-- Explorer kısmı -->
+    <h1>AidChain – Afet Yardım Takip Sistemi</h1>
+
     <label>
-      <strong>Registry ID:</strong>
-      <input id="registry-input" type="text" size="80" placeholder="0x..." />
+      Registry ID:
+      <input id="registry-input" type="text" />
     </label>
-    <button id="load-packages">Paketleri Yukle</button>
-  </div>
+    <button id="load-packages">Paketleri Yükle</button>
 
-  <div id="status" style="margin-bottom: 20px; color: #333;"></div>
+    <div id="status"></div>
+    <div id="packages"></div>
 
-  <div id="packages"></div>
-
-  <script type="module" src="/src/main.ts"></script>
-</body>
+    <!-- ÖNEMLİ: Artık main.tsx -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
