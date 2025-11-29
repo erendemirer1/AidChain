@@ -117,7 +117,7 @@ export function VerifierManagement() {
   if (loading) {
     return (
       <div className="card">
-        <h2>🏛️ DAO Üye Yönetimi</h2>
+        <h2>DAO Üye Yönetimi</h2>
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
           Yükleniyor...
         </div>
@@ -128,7 +128,7 @@ export function VerifierManagement() {
   if (!currentAccount) {
     return (
       <div className="card">
-        <h2>🏛️ DAO Üye Yönetimi</h2>
+        <h2>DAO Üye Yönetimi</h2>
         <div style={{
           padding: '40px',
           textAlign: 'center',
@@ -136,7 +136,7 @@ export function VerifierManagement() {
           borderRadius: '12px',
           color: '#64748b',
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔗</div>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}></div>
           <div style={{ fontSize: '16px', fontWeight: '500' }}>
             Lütfen cüzdanınızı bağlayın
           </div>
@@ -148,7 +148,7 @@ export function VerifierManagement() {
   if (!isAdmin) {
     return (
       <div className="card">
-        <h2>🏛️ DAO Üye Yönetimi</h2>
+        <h2>DAO Üye Yönetimi</h2>
         
         <div style={{
           padding: '24px',
@@ -221,13 +221,13 @@ export function VerifierManagement() {
         alignItems: 'center', 
         marginBottom: '24px' 
       }}>
-        <h2 style={{ margin: 0 }}>🏛️ DAO Üye Yönetimi</h2>
+        <h2 style={{ margin: 0 }}>DAO Üye Yönetimi</h2>
         <button 
           onClick={loadRegistryData} 
           className="btn-primary" 
           style={{ padding: '10px 20px' }}
         >
-          🔄 Yenile
+          Yenile
         </button>
       </div>
 
@@ -241,7 +241,7 @@ export function VerifierManagement() {
         borderRadius: '20px',
         marginBottom: '24px',
       }}>
-        <span>👑</span>
+        <span></span>
         <span style={{ fontSize: '14px', fontWeight: '500', color: '#166534' }}>
           Admin olarak giriş yaptınız
         </span>
@@ -328,7 +328,7 @@ export function VerifierManagement() {
           fontSize: '12px',
           color: '#075985',
         }}>
-          ⚠️ <strong>Dikkat:</strong> DAO üyeleri bir kez eklendiğinde blockchain'den çıkarılamaz. 
+          <strong>Dikkat:</strong> DAO üyeleri bir kez eklendiğinde blockchain'den çıkarılamaz. 
           Bu güvenlik önlemi, admin'in keyfi olarak üyeleri çıkarmasını engeller.
         </div>
       </div>
@@ -341,7 +341,7 @@ export function VerifierManagement() {
           gap: '12px',
           marginBottom: '16px',
         }}>
-          <span style={{ fontSize: '24px' }}>👥</span>
+          <span style={{ fontSize: '24px' }}></span>
           <div>
             <div style={{ fontWeight: '600', color: '#374151', fontSize: '16px' }}>
               Mevcut DAO Üyeleri
@@ -364,7 +364,7 @@ export function VerifierManagement() {
             border: '1px solid #fcd34d',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '20px' }}>👑</span>
+              <span style={{ fontSize: '20px' }}></span>
               <div>
                 <div style={{ fontWeight: '600', color: '#92400e', fontSize: '14px' }}>
                   Admin (Kurucu)
@@ -461,7 +461,7 @@ export function VerifierManagement() {
         border: '1px solid #e2e8f0',
       }}>
         <div style={{ fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
-          ℹ️ DAO Üyeleri Hakkında
+          DAO Üyeleri Hakkında
         </div>
         <ul style={{ 
           margin: 0, 

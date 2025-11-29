@@ -123,7 +123,7 @@ export function Dashboard() {
   }: { 
     title: string; 
     value: string | number; 
-    icon: string; 
+    icon: React.ReactNode; 
     color: string;
     subtitle?: string;
   }) => (
@@ -156,7 +156,6 @@ export function Dashboard() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '24px',
         }}>
           {icon}
         </div>
@@ -205,7 +204,7 @@ export function Dashboard() {
   if (loading) {
     return (
       <div className="card">
-        <h2>📊 Dashboard</h2>
+        <h2>Dashboard</h2>
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
           İstatistikler yükleniyor...
         </div>
@@ -223,7 +222,7 @@ export function Dashboard() {
         marginBottom: '24px',
       }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '24px', color: '#111827' }}>📊 Dashboard</h2>
+          <h2 style={{ margin: 0, fontSize: '24px', color: '#111827' }}>Dashboard</h2>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
             AidChain platform istatistikleri
           </p>
@@ -233,7 +232,7 @@ export function Dashboard() {
           className="btn-primary" 
           style={{ padding: '10px 20px' }}
         >
-          🔄 Yenile
+          Yenile
         </button>
       </div>
 
@@ -247,28 +246,28 @@ export function Dashboard() {
         <StatCard
           title="Toplam Bağış"
           value={`${formatSUI(stats.totalDonations)} SUI`}
-          icon="💰"
+          icon={<svg width="24" height="24" fill="none" stroke="#059669" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
           color="#dcfce7"
           subtitle="Tüm zamanlar"
         />
         <StatCard
           title="Toplam Alıcı"
           value={stats.totalRecipients}
-          icon="👥"
+          icon={<svg width="24" height="24" fill="none" stroke="#4f46e5" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>}
           color="#e0e7ff"
           subtitle={`${stats.verifiedRecipients} onaylı`}
         />
         <StatCard
           title="Yardım Paketleri"
           value={stats.totalPackages}
-          icon="📦"
+          icon={<svg width="24" height="24" fill="none" stroke="#d97706" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>}
           color="#fef3c7"
           subtitle={`${stats.deliveredPackages} teslim edildi`}
         />
         <StatCard
           title="DAO Üyeleri"
           value={stats.totalVerifiers + 1}
-          icon="🏛️"
+          icon={<svg width="24" height="24" fill="none" stroke="#db2777" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/></svg>}
           color="#fce7f3"
           subtitle="Admin + Verifier'lar"
         />
@@ -289,7 +288,7 @@ export function Dashboard() {
           border: '1px solid #e5e7eb',
         }}>
           <h3 style={{ margin: '0 0 20px', fontSize: '16px', color: '#111827' }}>
-            👥 Alıcı Durumu
+            Alıcı Durumu
           </h3>
           <ProgressBar
             label="Onaylı Alıcılar"
@@ -314,7 +313,7 @@ export function Dashboard() {
           border: '1px solid #e5e7eb',
         }}>
           <h3 style={{ margin: '0 0 20px', fontSize: '16px', color: '#111827' }}>
-            📦 Paket Durumu
+            Paket Durumu
           </h3>
           <ProgressBar
             label="Teslim Edilenler"
@@ -391,7 +390,7 @@ export function Dashboard() {
         border: '1px solid #e2e8f0',
       }}>
         <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '8px' }}>
-          📋 Registry ID
+          Registry ID
         </div>
         <code style={{
           fontSize: '12px',
@@ -415,7 +414,7 @@ export function Dashboard() {
               textDecoration: 'none',
             }}
           >
-            🔍 SuiVision'da Görüntüle →
+            SuiVision'da Görüntüle
           </a>
         </div>
       </div>

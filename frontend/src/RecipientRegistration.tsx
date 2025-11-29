@@ -17,6 +17,7 @@ export function RecipientRegistration() {
   const [description, setDescription] = useState('');
   const [residenceFile, setResidenceFile] = useState<File | null>(null);
   const [incomeFile, setIncomeFile] = useState<File | null>(null);
+  const [extraDocumentFile, setExtraDocumentFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [message, setMessage] = useState('');
@@ -98,6 +99,12 @@ export function RecipientRegistration() {
 
       const residenceBlobId = await uploadToWalrus(residenceFile, 'İkametgah belgesi');
       const incomeBlobId = await uploadToWalrus(incomeFile, 'Gelir belgesi');
+      
+      // Ekstra belge opsiyonel - varsa yükle, yoksa boş string
+      let extraDocumentBlobId = '';
+      if (extraDocumentFile) {
+        extraDocumentBlobId = await uploadToWalrus(extraDocumentFile, 'Ekstra belge');
+      }
 
       setUploadProgress('Blockchain kaydediliyor...');
 
@@ -117,6 +124,7 @@ export function RecipientRegistration() {
           txb.pure.string(phone),
           txb.pure.string(residenceBlobId),
           txb.pure.string(incomeBlobId),
+          txb.pure.string(extraDocumentBlobId),
           txb.pure.u64(parseInt(familySize) || 1),
           txb.pure.string(description),
         ],
@@ -141,6 +149,7 @@ export function RecipientRegistration() {
               setDescription('');
               setResidenceFile(null);
               setIncomeFile(null);
+              setExtraDocumentFile(null);
               setUploadProgress('');
             } else {
               const errorMsg = status.effects?.status?.error || 'Bilinmeyen hata';
@@ -184,7 +193,7 @@ export function RecipientRegistration() {
         color: '#92400e',
         border: '1px solid #fcd34d',
       }}>
-        ⚠️ <strong>Not:</strong> Admin ve STK üyeleri yardım başvurusu yapamaz.
+        <strong>Not:</strong> Admin ve STK üyeleri yardım başvurusu yapamaz.
       </div>
 
       <form onSubmit={handleRegister}>
@@ -314,7 +323,7 @@ export function RecipientRegistration() {
                 {residenceFile ? (
                   <div>
                     <div style={{ fontSize: '14px', color: '#059669', fontWeight: '500' }}>
-                      ✅ {residenceFile.name}
+                      {residenceFile.name}
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
                       {(residenceFile.size / 1024 / 1024).toFixed(2)} MB
@@ -336,7 +345,7 @@ export function RecipientRegistration() {
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-              💰 Gelir Belgesi * (Maaş bordrosu, SGK dökümü vb.)
+              Gelir Belgesi * (Maaş bordrosu, SGK dökümü vb.)
             </label>
             <div style={{ 
               border: '2px dashed #e2e8f0', 
@@ -361,7 +370,7 @@ export function RecipientRegistration() {
                 {incomeFile ? (
                   <div>
                     <div style={{ fontSize: '14px', color: '#059669', fontWeight: '500' }}>
-                      ✅ {incomeFile.name}
+                      {incomeFile.name}
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
                       {(incomeFile.size / 1024 / 1024).toFixed(2)} MB
@@ -381,8 +390,56 @@ export function RecipientRegistration() {
             </div>
           </div>
 
+          {/* Ekstra Belge (Opsiyonel) */}
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
+              Ekstra Belge (Opsiyonel - Saglik raporu, engellilik belgesi vb.)
+            </label>
+            <div style={{ 
+              border: '2px dashed #e2e8f0', 
+              borderRadius: '12px', 
+              padding: '20px',
+              textAlign: 'center',
+              background: extraDocumentFile ? '#eff6ff' : '#f8fafc',
+              borderColor: extraDocumentFile ? '#93c5fd' : '#e2e8f0',
+            }}>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                onChange={(e) => setExtraDocumentFile(e.target.files?.[0] || null)}
+                disabled={isSubmitting}
+                style={{ display: 'none' }}
+                id="extra-upload"
+              />
+              <label 
+                htmlFor="extra-upload" 
+                style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer', display: 'block' }}
+              >
+                {extraDocumentFile ? (
+                  <div>
+                    <div style={{ fontSize: '14px', color: '#2563eb', fontWeight: '500' }}>
+                      {extraDocumentFile.name}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+                      {(extraDocumentFile.size / 1024 / 1024).toFixed(2)} MB
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontSize: '14px', color: '#64748b' }}>
+                      Ek belge yukleyin (opsiyonel)
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+                      Saglik raporu, engellilik belgesi, sosyal yardım kararı vb.
+                    </div>
+                  </div>
+                )}
+              </label>
+            </div>
+          </div>
+
           <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '12px' }}>
-            🔒 Belgeleriniz Walrus decentralized storage'a yüklenir ve STK tarafından incelenir.
+            Belgeleriniz Walrus decentralized storage'a yuklenir ve STK tarafindan incelenir.
           </p>
         </div>
 

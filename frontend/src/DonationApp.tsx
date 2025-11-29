@@ -28,11 +28,10 @@ export function DonationApp() {
       </header>
 
       <div className="alert alert-info" style={{ margin: '1rem 0' }}>
-        <span>ℹ️</span>
         <div>
-          <strong>🌐 AidChain V8 - DAO Sistemi</strong>
+          <strong>AidChain V8 - DAO Sistemi</strong>
           <div style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>
-            DAO üyeleri kalıcıdır - bir kez eklenen üye blockchain'den çıkarılamaz!
+            DAO üyeleri kalıcıdır - bir kez eklenen üye blockchain'den çıkarılamaz.
           </div>
           <div style={{ marginTop: '0.5rem' }}>
             <a
@@ -41,7 +40,7 @@ export function DonationApp() {
               rel="noreferrer"
               style={{ fontSize: '0.75rem', color: 'var(--primary-color)', textDecoration: 'none' }}
             >
-              🔍 SuiVision'da Görüntüle →
+              SuiVision'da Görüntüle
             </a>
           </div>
         </div>
@@ -52,43 +51,43 @@ export function DonationApp() {
           onClick={() => setActiveTab('dashboard')}
           className={`tab-button ${activeTab === 'dashboard' ? 'active' : ''}`}
         >
-          📊 Dashboard
+          Dashboard
         </button>
         <button
           onClick={() => setActiveTab('donate')}
           className={`tab-button ${activeTab === 'donate' ? 'active' : ''}`}
         >
-          💝 Bağış Yap
+          Bağış Yap
         </button>
         <button
           onClick={() => setActiveTab('packages')}
           className={`tab-button ${activeTab === 'packages' ? 'active' : ''}`}
         >
-          📦 Paketler
+          Paketler
         </button>
         <button
           onClick={() => setActiveTab('register')}
           className={`tab-button ${activeTab === 'register' ? 'active' : ''}`}
         >
-          🙏 Yardım Al
+          Yardım Al
         </button>
         <button
           onClick={() => setActiveTab('recipients')}
           className={`tab-button ${activeTab === 'recipients' ? 'active' : ''}`}
         >
-          👥 Alıcılar
+          Alıcılar
         </button>
         <button
           onClick={() => setActiveTab('dao-members')}
           className={`tab-button ${activeTab === 'dao-members' ? 'active' : ''}`}
         >
-          🏛️ DAO Üyeleri
+          DAO Üyeleri
         </button>
         <button
           onClick={() => setActiveTab('dao-voting')}
           className={`tab-button ${activeTab === 'dao-voting' ? 'active' : ''}`}
         >
-          🗳️ Oylama
+          Oylama
         </button>
       </div>
 

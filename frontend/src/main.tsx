@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DonationApp } from './DonationApp';
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
 
-// ✅ Yeni registry ID (init_registry ile oluşturduğun):
+// Yeni registry ID (init_registry ile oluşturduğun):
 const DEFAULT_REGISTRY_ID =
   '0x044a5051f2b68d7d6e62c763f24ef0118c072e44f9b11e17f8a698724004eaba';
 
@@ -72,9 +72,9 @@ function status(msg: string) {
 }
 
 function statusLabel(s: number): string {
-  if (s === 0) return '📦 Oluşturuldu';
+  if (s === 0) return 'Oluşturuldu';
   if (s === 1) return '🚚 Yolda';
-  if (s === 2) return '✅ Teslim Edildi';
+  if (s === 2) return 'Teslim Edildi';
   return '❓ Bilinmiyor';
 }
 

@@ -76,6 +76,7 @@ module aidchain::aidchain {
         packages: vector<ID>,
         recipient_profiles: vector<ID>,
         proposals: vector<ID>,
+        profiles_with_proposals: vector<ID>,  // V10: Aktif proposal'ı olan profiller
         dao_config: DAOConfig,
         total_donations: u64,
         total_delivered: u64,
@@ -109,8 +110,9 @@ module aidchain::aidchain {
         received_packages_count: u64,
         tc_hash: String,
         phone: String,
-        residence_blob_id: String,     // İkametgah belgesi (Walrus)
-        income_blob_id: String,        // Gelir belgesi (Walrus)
+        residence_blob_id: String,        // İkametgah belgesi (Walrus)
+        income_blob_id: String,           // Gelir belgesi (Walrus)
+        extra_document_blob_id: String,   // Ekstra belge (Walrus) - sağlık raporu, engellilik belgesi vb.
         family_size: u64,
         description: String,
         proposal_id: Option<ID>,
@@ -248,6 +250,7 @@ module aidchain::aidchain {
             packages: vector::empty<ID>(),
             recipient_profiles: vector::empty<ID>(),
             proposals: vector::empty<ID>(),
+            profiles_with_proposals: vector::empty<ID>(),
             dao_config,
             total_donations: 0,
             total_delivered: 0,
@@ -343,9 +346,10 @@ module aidchain::aidchain {
     // ============================================
 
     /// Alıcı doğrulama önerisi oluştur (herhangi bir verifier)
+    /// V10: profile sadece okunuyor, aktif proposal kontrolü registry'den yapılıyor
     public entry fun create_verification_proposal(
         registry: &mut AidRegistry,
-        profile: &mut RecipientProfile,
+        profile: &RecipientProfile,
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
@@ -354,8 +358,9 @@ module aidchain::aidchain {
         // Zaten doğrulanmış mı?
         assert!(!profile.is_verified, E_ALREADY_DELIVERED);
         
-        // Zaten aktif proposal var mı?
-        assert!(option::is_none(&profile.proposal_id), E_PROPOSAL_EXISTS);
+        // Zaten aktif proposal var mı? (V10: registry'den kontrol)
+        let profile_id = object::id(profile);
+        assert!(!vector::contains(&registry.profiles_with_proposals, &profile_id), E_PROPOSAL_EXISTS);
 
         let current_epoch = tx_context::epoch(ctx);
         let expires_at = current_epoch + registry.dao_config.voting_period_epochs;
@@ -366,7 +371,7 @@ module aidchain::aidchain {
 
         let proposal = VerificationProposal {
             id: object::new(ctx),
-            profile_id: object::id(profile),
+            profile_id,
             profile_owner: profile.recipient,
             proposer: sender,
             votes_for,
@@ -380,15 +385,15 @@ module aidchain::aidchain {
 
         let proposal_id = object::id(&proposal);
         
-        // Profile'a proposal ID'yi kaydet
-        profile.proposal_id = option::some(proposal_id);
+        // V10: Profile'a yazmak yerine registry'ye ekliyoruz
+        vector::push_back(&mut registry.profiles_with_proposals, profile_id);
         
         // Registry'ye proposal ekle
         vector::push_back(&mut registry.proposals, proposal_id);
 
         event::emit(ProposalCreated {
             proposal_id,
-            profile_id: object::id(profile),
+            profile_id,
             proposer: sender,
             expires_at_epoch: expires_at,
             epoch: current_epoch,
@@ -504,8 +509,12 @@ module aidchain::aidchain {
         proposal.executed = true;
         proposal.execution_epoch = option::some(current_epoch);
         
-        // Profile'dan proposal referansını kaldır
-        profile.proposal_id = option::none();
+        // V10: Registry'den profile'ı kaldır (proposal_id yerine)
+        let profile_id = object::id(profile);
+        let (found, idx) = vector::index_of(&registry.profiles_with_proposals, &profile_id);
+        if (found) {
+            vector::remove(&mut registry.profiles_with_proposals, idx);
+        };
 
         event::emit(ProposalExecuted {
             proposal_id: object::id(proposal),
@@ -580,6 +589,7 @@ module aidchain::aidchain {
         phone: vector<u8>,
         residence_blob_id: vector<u8>,
         income_blob_id: vector<u8>,
+        extra_document_blob_id: vector<u8>,
         family_size: u64,
         description: vector<u8>,
         ctx: &mut TxContext
@@ -605,6 +615,7 @@ module aidchain::aidchain {
             phone: string::utf8(phone),
             residence_blob_id: string::utf8(residence_blob_id),
             income_blob_id: string::utf8(income_blob_id),
+            extra_document_blob_id: string::utf8(extra_document_blob_id),
             family_size,
             description: string::utf8(description),
             proposal_id: option::none(),

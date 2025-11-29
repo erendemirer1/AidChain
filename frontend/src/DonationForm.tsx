@@ -16,14 +16,16 @@ export function DonationForm() {
   const [amount, setAmount] = useState('0.1'); // SUI
   const [selectedRecipient, setSelectedRecipient] = useState<string>('');
   const [selectedRecipientName, setSelectedRecipientName] = useState<string>('');
+  const [selectedRecipientDescription, setSelectedRecipientDescription] = useState<string>('');
   const [showRecipientList, setShowRecipientList] = useState(false);
   const [txDigest, setTxDigest] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
 
-  const handleRecipientSelect = (address: string, name: string) => {
+  const handleRecipientSelect = (address: string, name: string, recipientDescription?: string) => {
     setSelectedRecipient(address);
     setSelectedRecipientName(name);
+    setSelectedRecipientDescription(recipientDescription || '');
     setShowRecipientList(false);
   };
 
@@ -60,7 +62,7 @@ export function DonationForm() {
           console.log('Transaction result:', result);
           
           if (!result.digest) {
-            setStatusMsg('❌ İşlem digest bilgisi alınamadı');
+            setStatusMsg('İşlem digest bilgisi alınamadı');
             return;
           }
           
@@ -81,26 +83,26 @@ export function DonationForm() {
             // Yetersiz bakiye kontrolü
             if (errorMsg.includes('InsufficientCoinBalance') || 
                 errorMsg.toLowerCase().includes('insufficient')) {
-              setStatusMsg('❌ Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.');
+              setStatusMsg('Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.');
             } else {
-              setStatusMsg(`❌ İşlem başarısız: ${errorMsg}`);
+              setStatusMsg(`İşlem başarısız: ${errorMsg}`);
             }
             return;
           }
           
           // Transaction başarılı
           if (executionStatus === 'success') {
-            setStatusMsg('✅ Bağış başarıyla blockchain\'e kaydedildi!');
+            setStatusMsg('Bağış başarıyla blockchain\'e kaydedildi!');
           } else {
             // Status belirsiz
-            setStatusMsg(`⚠️ İşlem durumu belirsiz. Tx: ${result.digest}`);
+            setStatusMsg(`İşlem durumu belirsiz. Tx: ${result.digest}`);
           }
         },
         onError: (err: any) => {
           setLoading(false);
           console.error('Transaction error:', err);
           
-          let errorMessage = '❌ ';
+          let errorMessage = '';
           
           // Hata mesajını analiz et
           if (err?.message) {
@@ -114,18 +116,18 @@ export function DonationForm() {
           // Yetersiz bakiye kontrolü
           if (errorMessage.toLowerCase().includes('insufficient') || 
               errorMessage.toLowerCase().includes('balance')) {
-            errorMessage = '❌ Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.';
+            errorMessage = 'Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.';
           }
           
           // Kullanıcı iptal etti
           if (errorMessage.toLowerCase().includes('rejected') || 
               errorMessage.toLowerCase().includes('cancelled')) {
-            errorMessage = '❌ İşlem kullanıcı tarafından iptal edildi.';
+            errorMessage = 'İşlem kullanıcı tarafından iptal edildi.';
           }
           
           // Gas ücreti yetersiz
           if (errorMessage.toLowerCase().includes('gas')) {
-            errorMessage = '❌ Gas ücreti için yetersiz bakiye.';
+            errorMessage = 'Gas ücreti için yetersiz bakiye.';
           }
           
           setStatusMsg(errorMessage);
@@ -169,35 +171,52 @@ export function DonationForm() {
             background: '#d4edda',
             border: '2px solid #28a745',
             borderRadius: '12px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
           }}>
-            <div>
-              <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-                {selectedRecipientName}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: selectedRecipientDescription ? '12px' : 0,
+            }}>
+              <div>
+                <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
+                  {selectedRecipientName}
+                </div>
+                <div style={{ fontSize: '12px', color: '#155724' }}>
+                  {selectedRecipient.slice(0, 8)}...{selectedRecipient.slice(-6)}
+                </div>
               </div>
-              <div style={{ fontSize: '12px', color: '#155724' }}>
-                {selectedRecipient.slice(0, 8)}...{selectedRecipient.slice(-6)}
-              </div>
+              <button
+                onClick={() => {
+                  setSelectedRecipient('');
+                  setSelectedRecipientName('');
+                  setSelectedRecipientDescription('');
+                }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  background: '#dc3545',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                }}
+              >
+                Degistir
+              </button>
             </div>
-            <button
-              onClick={() => {
-                setSelectedRecipient('');
-                setSelectedRecipientName('');
-              }}
-              style={{
-                padding: '8px 16px',
+            {selectedRecipientDescription && (
+              <div style={{
+                padding: '10px 12px',
+                background: '#c3e6cb',
                 borderRadius: '8px',
-                border: 'none',
-                background: '#dc3545',
-                color: 'white',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}
-            >
-              ✕ Değiştir
-            </button>
+                fontSize: '13px',
+                color: '#155724',
+                lineHeight: '1.5',
+              }}>
+                <strong>Durumu:</strong> {selectedRecipientDescription}
+              </div>
+            )}
           </div>
         ) : (
           <button

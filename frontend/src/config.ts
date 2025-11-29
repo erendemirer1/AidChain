@@ -1,23 +1,18 @@
 // src/config.ts
 
-// ====== AidChain V8 - VERİFİER ÇIKARMA KALDIRILDI ======
-// V8 Yenilikler:
-// - Bir kez eklenen verifier (DAO üyesi) blockchain'den ÇIKARILAMAZ
-// - remove_verifier fonksiyonu kaldırıldı
-// - Güvenlik: Admin bile keyfi olarak DAO üyelerini çıkaramaz
-//
-// V7'den korunan özellikler:
-// - Adminler/verifier'lar yardım başvurusu YAPAMAZ
-// - İkametgah + Gelir belgesi gerekli
-// - DAO oylama sistemi
+// ====== AidChain V10 - PROPOSAL OWNERSHIP FIX ======
+// V10 Yenilikler:
+// - create_verification_proposal artık profile'a yazmıyor (ownership hatası düzeltildi)
+// - profiles_with_proposals registry'de tutuluyor
+// - Verifier'lar başka kullanıcıların profile'ları için öneri oluşturabilir
 
 export const AIDCHAIN_PACKAGE_ID =
-  '0xc974b1f31dc9afdbe11f7b08ca15155f4d1a9aed8524138f42ee82833065f07d';
+  '0x1157d993f30167c9d5552d61d5a0e838871f6fe3b1e36312beeb5b8825891ce1';
 
 export const AIDCHAIN_REGISTRY_ID =
-  '0x7a170f06ef97d0254b5a08f694f54db71dcaf767f090ef1edade366e5e311889';
+  '0x5763027400406393cc10ae18707cb9b9e087ddf618f550db57fc924474608e49';
 
-export const REGISTRY_INITIAL_SHARED_VERSION = 670251442;
+export const REGISTRY_INITIAL_SHARED_VERSION = 670251448;
 
 // Walrus Testnet Aggregator/Publisher URLs
 export const WALRUS_AGGREGATOR_URL = 'https://aggregator.walrus-testnet.walrus.space';

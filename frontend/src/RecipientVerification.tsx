@@ -32,10 +32,11 @@ export function RecipientVerification() {
   const [unverifiedRecipients, setUnverifiedRecipients] = useState<RecipientProfile[]>([]);
   const [verifying, setVerifying] = useState<string | null>(null);
   const [registryAdmin, setRegistryAdmin] = useState<string | null>(null);
+  const [verifiers, setVerifiers] = useState<string[]>([]);
   const [creatingRegistry, setCreatingRegistry] = useState(false);
 
   useEffect(() => {
-    const loadAdmin = async () => {
+    const loadAdminAndVerifiers = async () => {
       try {
         const registryObj = await client.getObject({
           id: AIDCHAIN_REGISTRY_ID,
@@ -44,21 +45,26 @@ export function RecipientVerification() {
         if (registryObj.data?.content?.dataType === 'moveObject') {
           const fields = registryObj.data.content.fields as any;
           setRegistryAdmin(fields.admin);
+          setVerifiers(fields.verifiers || []);
         }
       } catch (err) {
-        console.error('Error loading registry admin:', err);
+        console.error('Error loading registry:', err);
       }
     };
-    loadAdmin();
+    loadAdminAndVerifiers();
   }, [client]);
 
-  const isCoordinator = registryAdmin && currentAccount?.address.toLowerCase() === registryAdmin.toLowerCase();
+  // Admin veya verifier ise yetkili
+  const isCoordinator = currentAccount && (
+    (registryAdmin && currentAccount.address.toLowerCase() === registryAdmin.toLowerCase()) ||
+    verifiers.some(v => v.toLowerCase() === currentAccount.address.toLowerCase())
+  );
 
   useEffect(() => {
     if (currentAccount && isCoordinator) {
       loadUnverifiedRecipients();
     }
-  }, [currentAccount, isCoordinator]);
+  }, [currentAccount, isCoordinator, verifiers]);
 
   const loadUnverifiedRecipients = async () => {
     setLoading(true);
@@ -450,7 +456,7 @@ export function RecipientVerification() {
                           border: '1px solid #93c5fd',
                         }}
                       >
-                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>💰 Gelir Belgesi</div>
+                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>Gelir Belgesi</div>
                         <div style={{ fontSize: '10px', fontFamily: 'monospace', color: '#1d4ed8' }}>
                           {recipient.incomeBlobId.slice(0, 16)}...
                         </div>
@@ -475,7 +481,7 @@ export function RecipientVerification() {
                     opacity: verifying === recipient.id ? 0.7 : 1,
                   }}
                 >
-                  {verifying === recipient.id ? 'Onaylanıyor...' : '✅ Onayla'}
+                  {verifying === recipient.id ? 'Onaylanıyor...' : 'Onayla'}
                 </button>
               </div>
             </div>

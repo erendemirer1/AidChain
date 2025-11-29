@@ -340,7 +340,7 @@ export function CoordinatorPanel() {
                       <div style={{ fontWeight: '500', color: '#334155', marginBottom: '2px' }}>Blockchain'de Görüntüle</div>
                       <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#94a3b8' }}>{pkg.id.slice(0, 20)}...{pkg.id.slice(-8)}</div>
                     </div>
-                    <span style={{ color: '#64748b' }}>→</span>
+                    <span style={{ color: '#64748b' }}></span>
                   </div>
                 </a>
 
