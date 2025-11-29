@@ -58,6 +58,16 @@ module aidchain::aidchain {
         registered_at_epoch: u64,
         /// Alınan toplam bağış sayısı
         received_packages_count: u64,
+        /// KYC: TC Kimlik numarasının SHA-256 hash'i (gizlilik için)
+        tc_hash: string::String,
+        /// KYC: Telefon numarası (doğrulama için)
+        phone: string::String,
+        /// Walrus: Hasar/kanıt fotoğrafının blob ID'si
+        evidence_blob_id: string::String,
+        /// Aile büyüklüğü (kişi sayısı)
+        family_size: u64,
+        /// Detaylı açıklama (hasar durumu vb.)
+        description: string::String,
     }
 
     /// Tekil bir yardım paketi
@@ -153,12 +163,17 @@ module aidchain::aidchain {
         assert!(registry.admin == caller, E_NOT_AUTHORIZED);
     }
 
-    /// Yardıma ihtiyacı olan kişi kendini kaydettirir
+    /// Yardıma ihtiyacı olan kişi kendini kaydettirir (KYC + Walrus kanıt ile)
     public entry fun register_recipient(
         registry: &mut AidRegistry,
         name: string::String,
         location: string::String,
         need_category: string::String,
+        tc_hash: string::String,
+        phone: string::String,
+        evidence_blob_id: string::String,
+        family_size: u64,
+        description: string::String,
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
@@ -173,6 +188,11 @@ module aidchain::aidchain {
             is_verified: false, // STK onaylayana kadar false
             registered_at_epoch: now,
             received_packages_count: 0,
+            tc_hash,
+            phone,
+            evidence_blob_id,
+            family_size,
+            description,
         };
 
         let profile_id = object::id(&profile);
