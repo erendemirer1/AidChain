@@ -23,3 +23,16 @@ export const DEFAULT_VOTING_PERIOD = 10;     // 10 epoch
 export const DEFAULT_QUORUM_PERCENT = 50;    // %50 katılım
 export const DEFAULT_APPROVAL_PERCENT = 60;  // %60 onay
 
+// ====== ENOKI SPONSORED TRANSACTIONS CONFIG ======
+// Sponsored transactions için backend proxy gerekli (private key güvenliği için)
+// Backend: /backend/server.js
+
+// Backend URL (local development)
+export const SPONSOR_BACKEND_URL = import.meta.env.VITE_SPONSOR_BACKEND_URL || 'http://localhost:3001';
+
+// Sponsored transaction için network
+export const ENOKI_NETWORK = 'testnet' as const;
+
+// Sponsored transaction aktif mi?
+export const SPONSORED_TX_ENABLED = import.meta.env.VITE_SPONSORED_TX_ENABLED === 'true';
+

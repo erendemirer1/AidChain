@@ -6,10 +6,13 @@ import {
 } from '@mysten/dapp-kit';
 import { buildDonateTx } from './buildDonateTx';
 import { RecipientList } from './RecipientList';
+import { useSponsoredTransaction } from './useSponsoredTransaction';
+import { AIDCHAIN_PACKAGE_ID } from './config';
 
 export function DonationForm() {
   const account = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const { executeSponsored, isLoading: sponsoredLoading, isEnabled: sponsoredEnabled } = useSponsoredTransaction();
 
   const [description] = useState('Yardım Paketi');
   const [location] = useState('-');
@@ -21,6 +24,7 @@ export function DonationForm() {
   const [txDigest, setTxDigest] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [useSponsored, setUseSponsored] = useState(true); // Default: sponsored aktif
 
   const handleRecipientSelect = (address: string, name: string, recipientDescription?: string) => {
     setSelectedRecipient(address);
@@ -29,7 +33,7 @@ export function DonationForm() {
     setShowRecipientList(false);
   };
 
-  const handleDonate = () => {
+  const handleDonate = async () => {
     if (!account) {
       alert('Önce cüzdanını bağlamalısın.');
       return;
@@ -52,6 +56,31 @@ export function DonationForm() {
     setStatusMsg(null);
     setTxDigest(null);
 
+    // Sponsored transaction kullan (eğer aktifse ve seçiliyse)
+    if (useSponsored && sponsoredEnabled) {
+      try {
+        setStatusMsg('⛽ Gas ücretsiz işlem hazırlanıyor...');
+        
+        const result = await executeSponsored(txb, [
+          `${AIDCHAIN_PACKAGE_ID}::aidchain::donate`,
+        ]);
+
+        setLoading(false);
+
+        if (result.success) {
+          setTxDigest(result.digest);
+          setStatusMsg('🎉 Bağış başarılı! Gas ücreti sponsor tarafından ödendi.');
+        } else {
+          setStatusMsg(`İşlem başarısız: ${result.error}`);
+        }
+      } catch (err: any) {
+        setLoading(false);
+        setStatusMsg(`Sponsored işlem hatası: ${err.message}`);
+      }
+      return;
+    }
+
+    // Normal transaction (fallback)
     signAndExecute(
       {
         transaction: txb,
@@ -66,7 +95,6 @@ export function DonationForm() {
             return;
           }
           
-          // ÖNEMLİ: Effects kontrolü - transaction gerçekten başarılı mı?
           const effects = result.effects;
           const executionStatus = effects?.status?.status;
           
@@ -75,12 +103,10 @@ export function DonationForm() {
           
           setTxDigest(result.digest);
           
-          // Transaction başarısız olduysa
           if (executionStatus === 'failure') {
             const errorMsg = effects?.status?.error || 'Bilinmeyen hata';
             console.error('Transaction failed:', errorMsg);
             
-            // Yetersiz bakiye kontrolü
             if (errorMsg.includes('InsufficientCoinBalance') || 
                 errorMsg.toLowerCase().includes('insufficient')) {
               setStatusMsg('Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.');
@@ -90,11 +116,9 @@ export function DonationForm() {
             return;
           }
           
-          // Transaction başarılı
           if (executionStatus === 'success') {
             setStatusMsg('Bağış başarıyla blockchain\'e kaydedildi!');
           } else {
-            // Status belirsiz
             setStatusMsg(`İşlem durumu belirsiz. Tx: ${result.digest}`);
           }
         },
@@ -104,7 +128,6 @@ export function DonationForm() {
           
           let errorMessage = '';
           
-          // Hata mesajını analiz et
           if (err?.message) {
             errorMessage += err.message;
           } else if (typeof err === 'string') {
@@ -113,19 +136,16 @@ export function DonationForm() {
             errorMessage += 'İşlem başarısız oldu';
           }
           
-          // Yetersiz bakiye kontrolü
           if (errorMessage.toLowerCase().includes('insufficient') || 
               errorMessage.toLowerCase().includes('balance')) {
             errorMessage = 'Yetersiz bakiye! Cüzdanınızda yeterli SUI yok.';
           }
           
-          // Kullanıcı iptal etti
           if (errorMessage.toLowerCase().includes('rejected') || 
               errorMessage.toLowerCase().includes('cancelled')) {
             errorMessage = 'İşlem kullanıcı tarafından iptal edildi.';
           }
           
-          // Gas ücreti yetersiz
           if (errorMessage.toLowerCase().includes('gas')) {
             errorMessage = 'Gas ücreti için yetersiz bakiye.';
           }
@@ -136,9 +156,28 @@ export function DonationForm() {
     );
   };
 
+  const isProcessing = loading || sponsoredLoading;
+
   return (
     <div className="card donation-card">
-      <h2>AidChain – Bağışçı Paneli</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>AidChain – Bağışçı Paneli</h2>
+        {sponsoredEnabled && (
+          <span style={{
+            padding: '4px 10px',
+            background: 'linear-gradient(135deg, #10b981, #059669)',
+            color: 'white',
+            borderRadius: '20px',
+            fontSize: '11px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}>
+            ⛽ GAS-FREE
+          </span>
+        )}
+      </div>
 
       {!account && (
         <p style={{ color: 'red' }}>
@@ -159,6 +198,47 @@ export function DonationForm() {
           onChange={(e) => setAmount(e.target.value)}
         />
       </label>
+
+      {/* Sponsored Transaction Toggle */}
+      {sponsoredEnabled && (
+        <div style={{
+          padding: '12px 16px',
+          background: useSponsored 
+            ? 'linear-gradient(135deg, #d1fae5, #a7f3d0)' 
+            : '#f3f4f6',
+          borderRadius: '12px',
+          marginBottom: '16px',
+          border: useSponsored ? '2px solid #10b981' : '2px solid #e5e7eb',
+        }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px',
+            cursor: 'pointer',
+          }}>
+            <input
+              type="checkbox"
+              checked={useSponsored}
+              onChange={(e) => setUseSponsored(e.target.checked)}
+              style={{ 
+                width: '20px', 
+                height: '20px',
+                accentColor: '#10b981',
+              }}
+            />
+            <div>
+              <div style={{ fontWeight: '600', color: useSponsored ? '#065f46' : '#374151' }}>
+                ⛽ Gas Ücretsiz İşlem
+              </div>
+              <div style={{ fontSize: '12px', color: useSponsored ? '#047857' : '#6b7280' }}>
+                {useSponsored 
+                  ? 'Aktif - Gas ücreti sponsor tarafından ödenecek' 
+                  : 'Kapalı - Normal işlem yapılacak'}
+              </div>
+            </div>
+          </label>
+        </div>
+      )}
 
       {/* Recipient Selection */}
       <div style={{ marginBottom: '20px' }}>
@@ -292,17 +372,43 @@ export function DonationForm() {
         </div>
       )}
 
-      <button onClick={handleDonate} disabled={loading || !account}>
-        {loading ? 'İşlem gönderiliyor...' : 'Bağış Yap'}
+      <button 
+        onClick={handleDonate} 
+        disabled={isProcessing || !account}
+        style={{
+          background: useSponsored && sponsoredEnabled 
+            ? 'linear-gradient(135deg, #10b981, #059669)' 
+            : undefined,
+        }}
+      >
+        {isProcessing 
+          ? (useSponsored && sponsoredEnabled ? '⛽ Gas-Free işlem...' : 'İşlem gönderiliyor...') 
+          : (useSponsored && sponsoredEnabled ? '⛽ Gas-Free Bağış Yap' : 'Bağış Yap')}
       </button>
 
       {statusMsg && (
-        <p style={{ marginTop: '0.5rem' }}>{statusMsg}</p>
+        <p style={{ 
+          marginTop: '0.5rem',
+          padding: '12px',
+          borderRadius: '8px',
+          background: statusMsg.includes('başarı') || statusMsg.includes('🎉') 
+            ? '#d1fae5' 
+            : statusMsg.includes('hazırlanıyor') 
+              ? '#dbeafe' 
+              : '#fee2e2',
+          color: statusMsg.includes('başarı') || statusMsg.includes('🎉') 
+            ? '#065f46' 
+            : statusMsg.includes('hazırlanıyor') 
+              ? '#1e40af' 
+              : '#991b1b',
+        }}>
+          {statusMsg}
+        </p>
       )}
 
       {txDigest && (
         <p>
-          İşlemi Explorer’da görüntüle:{' '}
+          İşlemi Explorer'da görüntüle:{' '}
           <a
             href={`https://suiexplorer.com/txblock/${txDigest}?network=testnet`}
             target="_blank"

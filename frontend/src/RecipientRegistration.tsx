@@ -5,8 +5,9 @@ import {
   AIDCHAIN_PACKAGE_ID, 
   AIDCHAIN_REGISTRY_ID, 
   REGISTRY_INITIAL_SHARED_VERSION,
-  WALRUS_PUBLISHER_URL 
+  WALRUS_PUBLISHER_URL
 } from './config';
+import { useSponsoredTransaction } from './useSponsoredTransaction';
 
 export function RecipientRegistration() {
   const [name, setName] = useState('');
@@ -21,10 +22,12 @@ export function RecipientRegistration() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState('');
   const [message, setMessage] = useState('');
+  const [useSponsored, setUseSponsored] = useState(true);
   
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const client = useSuiClient();
   const currentAccount = useCurrentAccount();
+  const { executeSponsored, isEnabled: sponsoredEnabled } = useSponsoredTransaction();
 
   const hashTC = async (tc: string): Promise<string> => {
     const encoder = new TextEncoder();
@@ -130,6 +133,43 @@ export function RecipientRegistration() {
         ],
       });
 
+      // Sponsored transaction kullan
+      if (useSponsored && sponsoredEnabled) {
+        setUploadProgress('⛽ Gas ücretsiz işlem hazırlanıyor...');
+        
+        try {
+          const result = await executeSponsored(txb, [
+            `${AIDCHAIN_PACKAGE_ID}::aidchain::register_recipient`,
+          ]);
+
+          if (result.success) {
+            setMessage('🎉 Kayıt başarılı! STK onayı bekleniyor... (Gas ücreti sponsor tarafından ödendi)');
+            setName('');
+            setLocation('');
+            setTcNo('');
+            setPhone('');
+            setFamilySize('1');
+            setDescription('');
+            setResidenceFile(null);
+            setIncomeFile(null);
+            setExtraDocumentFile(null);
+            setUploadProgress('');
+          } else {
+            if (result.error?.includes('23') || result.error?.includes('E_ADMIN_CANNOT_REGISTER')) {
+              setMessage('Admin/STK üyeleri yardım başvurusu yapamaz');
+            } else {
+              setMessage(`Kayıt başarısız: ${result.error}`);
+            }
+          }
+        } catch (error) {
+          setMessage(`Sponsored işlem hatası: ${(error as Error).message}`);
+        } finally {
+          setIsSubmitting(false);
+        }
+        return;
+      }
+
+      // Normal transaction (fallback)
       signAndExecute(
         { transaction: txb },
         {
@@ -178,11 +218,70 @@ export function RecipientRegistration() {
 
   return (
     <div className="card">
-      <h2>Yardım Başvurusu</h2>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+        <h2 style={{ margin: 0 }}>Yardım Başvurusu</h2>
+        {sponsoredEnabled && (
+          <span style={{
+            padding: '4px 10px',
+            background: 'linear-gradient(135deg, #10b981, #059669)',
+            color: 'white',
+            borderRadius: '20px',
+            fontSize: '11px',
+            fontWeight: '600',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}>
+            ⛽ GAS-FREE
+          </span>
+        )}
+      </div>
       
       <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '14px' }}>
         Yardım almak için aşağıdaki formu doldurun. Bilgileriniz STK tarafından doğrulandıktan sonra bağış alabilirsiniz.
+        {sponsoredEnabled && ' Gas ücreti sponsor tarafından karşılanır - tamamen ücretsiz!'}
       </p>
+
+      {/* Sponsored Transaction Toggle */}
+      {sponsoredEnabled && (
+        <div style={{
+          padding: '12px 16px',
+          background: useSponsored 
+            ? 'linear-gradient(135deg, #d1fae5, #a7f3d0)' 
+            : '#f3f4f6',
+          borderRadius: '12px',
+          marginBottom: '16px',
+          border: useSponsored ? '2px solid #10b981' : '2px solid #e5e7eb',
+        }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px',
+            cursor: 'pointer',
+          }}>
+            <input
+              type="checkbox"
+              checked={useSponsored}
+              onChange={(e) => setUseSponsored(e.target.checked)}
+              style={{ 
+                width: '20px', 
+                height: '20px',
+                accentColor: '#10b981',
+              }}
+            />
+            <div>
+              <div style={{ fontWeight: '600', color: useSponsored ? '#065f46' : '#374151' }}>
+                ⛽ Gas Ücretsiz Kayıt
+              </div>
+              <div style={{ fontSize: '12px', color: useSponsored ? '#047857' : '#6b7280' }}>
+                {useSponsored 
+                  ? 'Aktif - Gas ücreti sponsor tarafından ödenecek' 
+                  : 'Kapalı - Normal işlem yapılacak'}
+              </div>
+            </div>
+          </label>
+        </div>
+      )}
 
       <div style={{ 
         padding: '12px 16px', 
@@ -457,7 +556,7 @@ export function RecipientRegistration() {
         )}
 
         {message && (
-          <div className={`message ${message.includes('başarılı') ? 'message-success' : 'message-error'}`}>
+          <div className={`message ${message.includes('başarılı') || message.includes('🎉') ? 'message-success' : 'message-error'}`}>
             {message}
           </div>
         )}
@@ -466,9 +565,19 @@ export function RecipientRegistration() {
           type="submit"
           disabled={isSubmitting || !currentAccount}
           className="btn-primary"
-          style={{ width: '100%', padding: '14px' }}
+          style={{ 
+            width: '100%', 
+            padding: '14px',
+            background: useSponsored && sponsoredEnabled 
+              ? 'linear-gradient(135deg, #10b981, #059669)' 
+              : undefined,
+          }}
         >
-          {!currentAccount ? 'Önce Cüzdan Bağlayın' : isSubmitting ? 'Kaydediliyor...' : 'Başvuru Yap'}
+          {!currentAccount 
+            ? 'Önce Cüzdan Bağlayın' 
+            : isSubmitting 
+              ? (useSponsored && sponsoredEnabled ? '⛽ Gas-Free Kaydediliyor...' : 'Kaydediliyor...') 
+              : (useSponsored && sponsoredEnabled ? '⛽ Gas-Free Başvuru Yap' : 'Başvuru Yap')}
         </button>
       </form>
     </div>
