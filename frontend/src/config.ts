@@ -1,19 +1,19 @@
 // src/config.ts
-// AidChain Configuration - V11
+// AidChain Configuration - V12 (RecipientProfile shared)
 
 export const AIDCHAIN_PACKAGE_ID =
-  '0xd304461bb12677e9eec7cbc94cbca595af44e362fef1594b41c6b4ef618de3da';
+  '0x39a75e291a9eb2f71678d6908ca45fb65016961dffe7d344b233a07780bfb721';
 
 export const AIDCHAIN_REGISTRY_ID =
-  '0xae9fedfa3419cd46ae6e0b86a27ce96a80ba9428e4adaa83ede998e9674de992';
+  '0x9e91dbb52ab2f12c1bc777d73b04b0976ed7e5f0d8353781d6bb6a0f390c69b5';
 
-export const REGISTRY_INITIAL_SHARED_VERSION = 670251451;
+export const REGISTRY_INITIAL_SHARED_VERSION = 670251457;
 
 // Impact NFT Configuration
 export const IMPACT_COUNTER_ID =
-  '0x67ee24048776782d84bf18acbe5e9f7bb820bc9db51668c0802720861e0899a7';
+  '0xeb6981cf24490e3265c53cc3d769d415a0710dc4227aed53cdbfdb1f292a6097';
 
-export const IMPACT_COUNTER_INITIAL_SHARED_VERSION = 670251442;
+export const IMPACT_COUNTER_INITIAL_SHARED_VERSION = 670251444;
 
 // Walrus Testnet URLs
 export const WALRUS_AGGREGATOR_URL = 'https://aggregator.walrus-testnet.walrus.space';

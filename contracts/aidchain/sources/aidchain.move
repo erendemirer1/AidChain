@@ -626,7 +626,8 @@ module aidchain::aidchain {
         let profile_id = object::id(&profile);
         vector::push_back(&mut registry.recipient_profiles, profile_id);
 
-        transfer::transfer(profile, sender);
+        // V12: Make profile a shared object so anyone can use it in transactions
+        transfer::share_object(profile);
     }
 
     // ============================================

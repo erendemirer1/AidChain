@@ -8,10 +8,11 @@ import { VerifierManagement } from './VerifierManagement';
 import { DAOPanel } from './DAOPanel';
 import { Dashboard } from './Dashboard';
 import { ImpactNFTPanel } from './ImpactNFTPanel';
+import { CreateRegistry } from './CreateRegistry';
 import { AIDCHAIN_REGISTRY_ID } from './config';
 
 export function DonationApp() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'donate' | 'packages' | 'register' | 'recipients' | 'dao-members' | 'dao-voting' | 'impact-nft'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'donate' | 'packages' | 'register' | 'recipients' | 'dao-members' | 'dao-voting' | 'impact-nft' | 'create-registry'>('dashboard');
 
   return (
     <div className="app-container">
@@ -97,6 +98,13 @@ export function DonationApp() {
         >
           🏆 Impact NFT
         </button>
+        <button
+          onClick={() => setActiveTab('create-registry')}
+          className={`tab-button ${activeTab === 'create-registry' ? 'active' : ''}`}
+          style={{ marginLeft: 'auto', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+        >
+          🏗️ New Registry
+        </button>
       </div>
 
       <main className="main-layout">
@@ -145,6 +153,12 @@ export function DonationApp() {
         {activeTab === 'impact-nft' && (
           <section style={{ gridColumn: '1 / -1' }}>
             <ImpactNFTPanel />
+          </section>
+        )}
+
+        {activeTab === 'create-registry' && (
+          <section style={{ gridColumn: '1 / -1' }}>
+            <CreateRegistry />
           </section>
         )}
       </main>

@@ -145,9 +145,9 @@ export function DAOPanel() {
 
             if (profileObj.data?.content?.dataType === 'moveObject') {
               const f = profileObj.data.content.fields as any;
-              const owner = profileObj.data.owner;
-              const ownerAddr = owner && typeof owner === 'object' && 'AddressOwner' in owner 
-                ? owner.AddressOwner : 'Unknown';
+              
+              // V12: Profile is now shared object, use recipient field instead of owner
+              const ownerAddr = f.recipient || 'Unknown';
 
               const profile: RecipientProfile = {
                 id: profileId,
