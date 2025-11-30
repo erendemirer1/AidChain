@@ -23,7 +23,7 @@ export function buildDonateTx(
       }),
       txb.pure.string(description),
       txb.pure.string(location),
-      txb.pure.address('0x114aa1f7c47970c88eaafac9c127f9ee9fbb91047fa04426f66a26d62034a813'), // Senin cüzdanın (Yeni registry admin)
+      txb.pure.address('0x114aa1f7c47970c88eaafac9c127f9ee9fbb91047fa04426f66a26d62034a813'), // Your wallet (Registry admin)
       txb.pure.address(recipientAddress),
       donationCoin,
     ],

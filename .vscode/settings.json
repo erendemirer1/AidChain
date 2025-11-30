@@ -1,0 +1,6 @@
+{
+  "github.copilot.chat.codesearch.enabled": true,
+  "github.copilot.chat.agent.runTasks": true,
+  "github.copilot.chat.agent.autoFix": true,
+  "github.copilot.chat.terminalChatLocation": "terminal"
+}

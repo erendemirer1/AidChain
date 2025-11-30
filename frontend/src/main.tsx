@@ -13,7 +13,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DonationApp } from './DonationApp';
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
 
-// Yeni registry ID (init_registry ile oluşturduğun):
+// Registry ID:
 const DEFAULT_REGISTRY_ID =
   '0x044a5051f2b68d7d6e62c763f24ef0118c072e44f9b11e17f8a698724004eaba';
 
@@ -26,7 +26,7 @@ const { networkConfig } = createNetworkConfig({
 });
 
 // --------------------
-// React: Bağışçı Paneli
+// React: Donor Panel
 // --------------------
 const rootElement = document.getElementById('donation-root')!;
 
@@ -43,7 +43,7 @@ ReactDOM.createRoot(rootElement).render(
 );
 
 // --------------------
-// Vanilla TS: Explorer (Registry + Paketler)
+// Vanilla TS: Explorer (Registry + Packageler)
 // --------------------
 
 // Testnet fullnode client (read-only)
@@ -62,7 +62,7 @@ const packagesDiv = document.getElementById(
   'packages',
 ) as HTMLDivElement | null;
 
-// 👉 İSTEDİĞİN KISIM: Sayfa açıldığında registry ID otomatik dolsun
+// Auto-fill registry ID on page load
 if (registryInput && DEFAULT_REGISTRY_ID) {
   registryInput.value = DEFAULT_REGISTRY_ID;
 }
@@ -72,14 +72,14 @@ function status(msg: string) {
 }
 
 function statusLabel(s: number): string {
-  if (s === 0) return 'Oluşturuldu';
-  if (s === 1) return '🚚 Yolda';
-  if (s === 2) return 'Teslim Edildi';
-  return '❓ Bilinmiyor';
+  if (s === 0) return 'Created';
+  if (s === 1) return '🚚 In Transit';
+  if (s === 2) return 'Delivered';
+  return '❓ Unknown';
 }
 
 async function loadRegistry(registryId: string) {
-  status('Registry okunuyor...');
+  status('Reading registry...');
 
   const registryObj = await client.getObject({
     id: registryId,
@@ -88,13 +88,13 @@ async function loadRegistry(registryId: string) {
 
   if ((registryObj as any).error) {
     const err = (registryObj as any).error;
-    status(`Registry okunamadı: ${err.code ?? 'bilinmeyen hata'}`);
+    status(`Could not read registry: ${err.code ?? 'unknown error'}`);
     return null;
   }
 
   const content = (registryObj as any).data?.content;
   if (!content || content.dataType !== 'moveObject') {
-    status('Registry formatı geçersiz');
+    status('Invalid registry format');
     return null;
   }
 
@@ -108,12 +108,12 @@ async function loadPackages(registryId: string) {
   const ids: string[] = reg.packages;
 
   if (!ids || ids.length === 0) {
-    status('Henüz kayıtlı yardım paketi yok.');
+    status('No aid packages registered yet.');
     if (packagesDiv) packagesDiv.innerHTML = '';
     return;
   }
 
-  status(`Toplam ${ids.length} paket bulundu. Yükleniyor...`);
+  status(`Total ${ids.length} packages found. Loading...`);
 
   const objs = await client.multiGetObjects({
     ids,
@@ -138,18 +138,18 @@ async function loadPackages(registryId: string) {
     const proof: string = f.proof_url ?? '';
 
     card.innerHTML = `
-      <h3>Paket #${i + 1}</h3>
-      <p><strong>Açıklama:</strong> ${f.description}</p>
-      <p><strong>Lokasyon:</strong> ${f.location}</p>
-      <p><strong>Durum:</strong> ${statusLabel(Number(f.status))}</p>
-      <p><strong>Bağışçı:</strong> ${f.donor}</p>
-      <p><strong>Koordinatör:</strong> ${f.coordinator}</p>
+      <h3>Package #${i + 1}</h3>
+      <p><strong>Description:</strong> ${f.description}</p>
+      <p><strong>Location:</strong> ${f.location}</p>
+      <p><strong>Status:</strong> ${statusLabel(Number(f.status))}</p>
+      <p><strong>Donor:</strong> ${f.donor}</p>
+      <p><strong>Coordinator:</strong> ${f.coordinator}</p>
       <p><strong>Recipient:</strong> ${recipientStr}</p>
-      <p><strong>Bağış Tutarı (MIST):</strong> ${f.donation_amount}</p>
-      <p><strong>Teslim Kanıtı (Walrus):</strong> ${
+      <p><strong>Donation Amount (MIST):</strong> ${f.donation_amount}</p>
+      <p><strong>Delivery Proof (Walrus):</strong> ${
         proof && proof.length > 0
           ? `<a href="${proof}" target="_blank" rel="noreferrer">${proof}</a>`
-          : 'Henüz eklenmedi'
+          : 'Not added yet'
       }</p>
       <small>created_epoch: ${f.created_at_epoch}, updated_epoch: ${f.updated_at_epoch}</small>
     `;
@@ -157,15 +157,15 @@ async function loadPackages(registryId: string) {
     packagesDiv.appendChild(card);
   });
 
-  status('Paketler başarıyla yüklendi.');
+  status('Packages loaded successfully.');
 }
 
-// Butona click handler bağla
+// Bind click handler to button
 if (loadBtn) {
   loadBtn.onclick = () => {
     const id = registryInput?.value.trim();
     if (!id) {
-      status('Lütfen registry ID gir.');
+      status('Please enter registry ID.');
       return;
     }
     loadPackages(id);

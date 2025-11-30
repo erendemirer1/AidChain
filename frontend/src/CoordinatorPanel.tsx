@@ -115,7 +115,7 @@ export function CoordinatorPanel() {
     if (!account) return;
 
     const note = deliveryNotes[pkg.id] || '';
-    setStatusMsg('Gönderiliyor...');
+    setStatusMsg('Sending...');
 
     try {
       const tx = new Transaction();
@@ -132,7 +132,7 @@ export function CoordinatorPanel() {
         {
           onSuccess: async (result) => {
             if (!result.digest) {
-              setStatusMsg('Başarısız');
+              setStatusMsg('Failed');
               return;
             }
 
@@ -142,19 +142,19 @@ export function CoordinatorPanel() {
             });
 
             if (status.effects?.status?.status === 'success') {
-              setStatusMsg('Teslim kaydedildi');
+              setStatusMsg('Delivery recorded');
               loadPackages();
             } else {
-              setStatusMsg('Başarısız');
+              setStatusMsg('Failed');
             }
           },
           onError: (error) => {
-            setStatusMsg(`Hata: ${error.message}`);
+            setStatusMsg(`Error: ${error.message}`);
           },
         }
       );
     } catch (error) {
-      setStatusMsg(`Hata: ${(error as Error).message}`);
+      setStatusMsg(`Error: ${(error as Error).message}`);
     }
   };
 
@@ -171,9 +171,9 @@ export function CoordinatorPanel() {
   if (loading) {
     return (
       <div className="card">
-        <h2>Paketler</h2>
+        <h2>Packages</h2>
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
-          Yükleniyor...
+          Loading...
         </div>
       </div>
     );
@@ -182,21 +182,21 @@ export function CoordinatorPanel() {
   return (
     <div className="card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ margin: 0 }}>Paketler</h2>
+        <h2 style={{ margin: 0 }}>Packages</h2>
         <button onClick={loadPackages} className="btn-primary" style={{ padding: '10px 20px', fontSize: '14px' }}>
-          Yenile
+          Refresh
         </button>
       </div>
 
       {statusMsg && (
-        <div className={`message ${statusMsg.includes('kaydedildi') ? 'message-success' : 'message-error'}`}>
+        <div className={`message ${statusMsg.includes('recorded') ? 'message-success' : 'message-error'}`}>
           {statusMsg}
         </div>
       )}
 
       {packages.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
-          Henüz paket yok
+          No packages yet
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -251,7 +251,7 @@ export function CoordinatorPanel() {
                   background: pkg.status === 2 ? '#dcfce7' : pkg.status === 1 ? '#fef3c7' : '#dbeafe',
                   color: pkg.status === 2 ? '#166534' : pkg.status === 1 ? '#92400e' : '#1e40af',
                 }}>
-                  {pkg.status === 0 ? 'Bekliyor' : pkg.status === 1 ? 'Yolda' : 'Teslim Edildi'}
+                  {pkg.status === 0 ? 'Pending' : pkg.status === 1 ? 'In Transit' : 'Delivered'}
                 </div>
               </div>
 
@@ -269,7 +269,7 @@ export function CoordinatorPanel() {
                 }}>
                   <div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                      Bağış Miktarı
+                      Donation Amount
                     </div>
                     <div style={{ fontSize: '24px', fontWeight: '700', color: '#0f172a' }}>
                       {formatSui(pkg.donation_amount)} <span style={{ fontSize: '14px', fontWeight: '500', color: '#64748b' }}>SUI</span>
@@ -284,7 +284,7 @@ export function CoordinatorPanel() {
                       fontSize: '13px',
                       fontWeight: '500',
                     }}>
-                      Escrow'da Kilitli
+                      Locked in Escrow
                     </div>
                   )}
                 </div>
@@ -297,16 +297,16 @@ export function CoordinatorPanel() {
                   marginBottom: '16px',
                 }}>
                   <div style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>Bağışçı</div>
+                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>Donor</div>
                     <div style={{ fontSize: '13px', fontFamily: 'monospace', color: '#374151' }}>{shortenAddress(pkg.donor)}</div>
                   </div>
                   <div style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>Koordinatör</div>
+                    <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>Coordinator</div>
                     <div style={{ fontSize: '13px', fontFamily: 'monospace', color: '#374151' }}>{shortenAddress(pkg.coordinator)}</div>
                   </div>
                   {pkg.recipient && (
                     <div style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>Alıcı</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>Recipient</div>
                       <div style={{ fontSize: '13px', fontFamily: 'monospace', color: '#374151' }}>{shortenAddress(pkg.recipient)}</div>
                     </div>
                   )}
@@ -337,7 +337,7 @@ export function CoordinatorPanel() {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div style={{ fontWeight: '500', color: '#334155', marginBottom: '2px' }}>Blockchain'de Görüntüle</div>
+                      <div style={{ fontWeight: '500', color: '#334155', marginBottom: '2px' }}>View on Blockchain</div>
                       <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#94a3b8' }}>{pkg.id.slice(0, 20)}...{pkg.id.slice(-8)}</div>
                     </div>
                     <span style={{ color: '#64748b' }}></span>
@@ -349,7 +349,7 @@ export function CoordinatorPanel() {
                   <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '16px' }}>
                     <input
                       type="text"
-                      placeholder="Teslimat notu ekle (opsiyonel)"
+                      placeholder="Add delivery note (optional)"
                       value={deliveryNotes[pkg.id] || ''}
                       onChange={(e) => setDeliveryNotes({ ...deliveryNotes, [pkg.id]: e.target.value })}
                       style={{ 
@@ -374,7 +374,7 @@ export function CoordinatorPanel() {
                         cursor: 'pointer',
                       }}
                     >
-                      Teslim Aldım
+                      Mark as Received
                     </button>
                   </div>
                 )}
@@ -387,7 +387,7 @@ export function CoordinatorPanel() {
                     borderRadius: '8px', 
                     borderLeft: '3px solid #22c55e',
                   }}>
-                    <div style={{ fontSize: '11px', color: '#16a34a', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>Teslimat Notu</div>
+                    <div style={{ fontSize: '11px', color: '#16a34a', marginBottom: '4px', textTransform: 'uppercase', fontWeight: '600' }}>Delivery Note</div>
                     <div style={{ fontSize: '14px', color: '#166534' }}>{pkg.delivery_note}</div>
                   </div>
                 )}

@@ -1,5 +1,5 @@
 // src/useSponsoredTransaction.ts
-// Enoki Sponsored Transaction Hook - Backend proxy üzerinden
+// Enoki Sponsored Transaction Hook - Gas-free transactions via backend proxy
 
 import { useState, useCallback } from 'react';
 import { useCurrentAccount, useSignTransaction, useSuiClient } from '@mysten/dapp-kit';
@@ -38,24 +38,22 @@ export function useSponsoredTransaction(): UseSponsoredTransactionReturn {
     allowedTargets?: string[]
   ): Promise<SponsoredTxResult> => {
     if (!currentAccount) {
-      return { digest: '', success: false, error: 'Cüzdan bağlı değil' };
+      return { digest: '', success: false, error: 'Wallet not connected' };
     }
 
     if (!SPONSORED_TX_ENABLED) {
-      return { digest: '', success: false, error: 'Sponsored transactions etkin değil' };
+      return { digest: '', success: false, error: 'Sponsored transactions not enabled' };
     }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // 1. Transaction'ı kind bytes olarak derle
       const txBytes = await tx.build({
         client,
         onlyTransactionKind: true,
       });
 
-      // 2. Default allowed targets - AidChain package fonksiyonları
       const targets = allowedTargets || [
         `${AIDCHAIN_PACKAGE_ID}::aidchain::donate`,
         `${AIDCHAIN_PACKAGE_ID}::aidchain::register_recipient`,
@@ -64,13 +62,6 @@ export function useSponsoredTransaction(): UseSponsoredTransactionReturn {
         `${AIDCHAIN_PACKAGE_ID}::aidchain::execute_proposal`,
       ];
 
-      console.log('Creating sponsored tx via backend:', {
-        network: ENOKI_NETWORK,
-        sender: currentAccount.address,
-        targets,
-      });
-
-      // 3. Backend'e sponsor isteği gönder
       const sponsorResponse = await fetch(`${SPONSOR_BACKEND_URL}/api/sponsor`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,18 +79,15 @@ export function useSponsoredTransaction(): UseSponsoredTransactionReturn {
       }
 
       const sponsoredData = await sponsorResponse.json();
-      console.log('Sponsored response:', sponsoredData);
 
-      // 4. Kullanıcıdan imza al
       const { signature } = await signTransaction({
         transaction: Transaction.from(fromB64(sponsoredData.bytes)),
       });
 
       if (!signature) {
-        throw new Error('İmza alınamadı');
+        throw new Error('Failed to get signature');
       }
 
-      // 5. Backend'e execute isteği gönder
       const executeResponse = await fetch(`${SPONSOR_BACKEND_URL}/api/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -115,7 +103,6 @@ export function useSponsoredTransaction(): UseSponsoredTransactionReturn {
       }
 
       const executeData = await executeResponse.json();
-      console.log('Execute response:', executeData);
 
       setIsLoading(false);
       return {
@@ -126,11 +113,10 @@ export function useSponsoredTransaction(): UseSponsoredTransactionReturn {
     } catch (err: any) {
       console.error('Sponsored tx error:', err);
       
-      let errorMessage = err?.message || 'Sponsored transaction başarısız';
+      let errorMessage = err?.message || 'Sponsored transaction failed';
       
-      // Network hatası
       if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-        errorMessage = 'Backend sunucusuna bağlanılamadı. Backend çalışıyor mu?';
+        errorMessage = 'Cannot connect to backend server';
       }
       
       setError(errorMessage);

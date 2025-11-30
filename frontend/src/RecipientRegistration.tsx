@@ -38,7 +38,7 @@ export function RecipientRegistration() {
   };
 
   const uploadToWalrus = async (file: File, label: string): Promise<string> => {
-    setUploadProgress(`${label} Walrus'a yükleniyor...`);
+    setUploadProgress(`${label} Uploading to Walrus...`);
     
     try {
       const response = await fetch(`${WALRUS_PUBLISHER_URL}/v1/blobs`, {
@@ -47,7 +47,7 @@ export function RecipientRegistration() {
       });
 
       if (!response.ok) {
-        throw new Error(`${label} yükleme hatası`);
+        throw new Error(`${label} upload error`);
       }
 
       const result = await response.json();
@@ -64,32 +64,32 @@ export function RecipientRegistration() {
     e.preventDefault();
     
     if (!currentAccount) {
-      setMessage('Lütfen önce cüzdanınızı bağlayın');
+      setMessage('Please connect your wallet first');
       return;
     }
 
     if (!name || !location || !tcNo || !phone) {
-      setMessage('Lütfen tüm zorunlu alanları doldurun');
+      setMessage('Please fill in all required fields');
       return;
     }
 
     if (tcNo.length !== 11 || !/^\d+$/.test(tcNo)) {
-      setMessage('TC Kimlik numarası 11 haneli olmalıdır');
+      setMessage('ID number must be 11 digits');
       return;
     }
 
     if (phone.length < 10) {
-      setMessage('Geçerli bir telefon numarası girin');
+      setMessage('Please enter a valid phone number');
       return;
     }
 
     if (!residenceFile) {
-      setMessage('İkametgah belgesi yüklemek zorunludur');
+      setMessage('Residence document is required');
       return;
     }
 
     if (!incomeFile) {
-      setMessage('Gelir belgesi yüklemek zorunludur');
+      setMessage('Income document is required');
       return;
     }
 
@@ -97,19 +97,19 @@ export function RecipientRegistration() {
     setMessage('');
 
     try {
-      setUploadProgress('TC Kimlik hashleniyor...');
+      setUploadProgress('Hashing ID number...');
       const tcHash = await hashTC(tcNo);
 
-      const residenceBlobId = await uploadToWalrus(residenceFile, 'İkametgah belgesi');
-      const incomeBlobId = await uploadToWalrus(incomeFile, 'Gelir belgesi');
+      const residenceBlobId = await uploadToWalrus(residenceFile, 'Residence document');
+      const incomeBlobId = await uploadToWalrus(incomeFile, 'Income document');
       
-      // Ekstra belge opsiyonel - varsa yükle, yoksa boş string
+      // Extra document optional - upload if exists, empty string otherwise
       let extraDocumentBlobId = '';
       if (extraDocumentFile) {
-        extraDocumentBlobId = await uploadToWalrus(extraDocumentFile, 'Ekstra belge');
+        extraDocumentBlobId = await uploadToWalrus(extraDocumentFile, 'Extra document');
       }
 
-      setUploadProgress('Blockchain kaydediliyor...');
+      setUploadProgress('Recording on blockchain...');
 
       const txb = new Transaction();
       
@@ -133,9 +133,9 @@ export function RecipientRegistration() {
         ],
       });
 
-      // Sponsored transaction kullan
+      // Use sponsored transaction (if enabled)
       if (useSponsored && sponsoredEnabled) {
-        setUploadProgress('⛽ Gas ücretsiz işlem hazırlanıyor...');
+        setUploadProgress('⛽ Preparing gas-free transaction...');
         
         try {
           const result = await executeSponsored(txb, [
@@ -143,7 +143,7 @@ export function RecipientRegistration() {
           ]);
 
           if (result.success) {
-            setMessage('🎉 Kayıt başarılı! STK onayı bekleniyor... (Gas ücreti sponsor tarafından ödendi)');
+            setMessage('🎉 Registration successful! Awaiting NGO verification... (Gas fee paid by sponsor)');
             setName('');
             setLocation('');
             setTcNo('');
@@ -156,13 +156,13 @@ export function RecipientRegistration() {
             setUploadProgress('');
           } else {
             if (result.error?.includes('23') || result.error?.includes('E_ADMIN_CANNOT_REGISTER')) {
-              setMessage('Admin/STK üyeleri yardım başvurusu yapamaz');
+              setMessage('Admin/NGO members cannot apply for aid');
             } else {
-              setMessage(`Kayıt başarısız: ${result.error}`);
+              setMessage(`Registration failed: ${result.error}`);
             }
           }
         } catch (error) {
-          setMessage(`Sponsored işlem hatası: ${(error as Error).message}`);
+          setMessage(`Sponsored transaction error: ${(error as Error).message}`);
         } finally {
           setIsSubmitting(false);
         }
@@ -180,7 +180,7 @@ export function RecipientRegistration() {
             });
 
             if (status.effects?.status?.status === 'success') {
-              setMessage('Kayıt başarılı! STK onayı bekleniyor...');
+              setMessage('Registration successful! Awaiting NGO verification...');
               setName('');
               setLocation('');
               setTcNo('');
@@ -192,25 +192,25 @@ export function RecipientRegistration() {
               setExtraDocumentFile(null);
               setUploadProgress('');
             } else {
-              const errorMsg = status.effects?.status?.error || 'Bilinmeyen hata';
+              const errorMsg = status.effects?.status?.error || 'Unknown error';
               if (errorMsg.includes('23') || errorMsg.includes('E_ADMIN_CANNOT_REGISTER')) {
-                setMessage('Admin/STK üyeleri yardım başvurusu yapamaz');
+                setMessage('Admin/NGO members cannot apply for aid');
               } else {
-                setMessage(`Kayıt başarısız: ${errorMsg}`);
+                setMessage(`Registration failed: ${errorMsg}`);
               }
             }
           },
           onError: (error) => {
             if (error.message.includes('23')) {
-              setMessage('Admin/STK üyeleri yardım başvurusu yapamaz');
+              setMessage('Admin/NGO members cannot apply for aid');
             } else {
-              setMessage(`Hata: ${error.message}`);
+              setMessage(`Error: ${error.message}`);
             }
           },
         }
       );
     } catch (error) {
-      setMessage(`İşlem hatası: ${(error as Error).message}`);
+      setMessage(`Transaction error: ${(error as Error).message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -219,7 +219,7 @@ export function RecipientRegistration() {
   return (
     <div className="card">
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-        <h2 style={{ margin: 0 }}>Yardım Başvurusu</h2>
+        <h2 style={{ margin: 0 }}>Aid Application</h2>
         {sponsoredEnabled && (
           <span style={{
             padding: '4px 10px',
@@ -238,8 +238,8 @@ export function RecipientRegistration() {
       </div>
       
       <p style={{ color: '#64748b', marginBottom: '24px', fontSize: '14px' }}>
-        Yardım almak için aşağıdaki formu doldurun. Bilgileriniz STK tarafından doğrulandıktan sonra bağış alabilirsiniz.
-        {sponsoredEnabled && ' Gas ücreti sponsor tarafından karşılanır - tamamen ücretsiz!'}
+        Fill out the form below to apply for aid. You can receive donations after your information is verified by the NGO.
+        {sponsoredEnabled && ' Gas fee is covered by sponsor - completely free!'}
       </p>
 
       {/* Sponsored Transaction Toggle */}
@@ -271,12 +271,12 @@ export function RecipientRegistration() {
             />
             <div>
               <div style={{ fontWeight: '600', color: useSponsored ? '#065f46' : '#374151' }}>
-                ⛽ Gas Ücretsiz Kayıt
+                ⛽ Gas-Free Registration
               </div>
               <div style={{ fontSize: '12px', color: useSponsored ? '#047857' : '#6b7280' }}>
                 {useSponsored 
-                  ? 'Aktif - Gas ücreti sponsor tarafından ödenecek' 
-                  : 'Kapalı - Normal işlem yapılacak'}
+                  ? 'Active - Gas fee will be paid by sponsor' 
+                  : 'Disabled - Normal transaction will be used'}
               </div>
             </div>
           </label>
@@ -292,30 +292,30 @@ export function RecipientRegistration() {
         color: '#92400e',
         border: '1px solid #fcd34d',
       }}>
-        <strong>Not:</strong> Admin ve STK üyeleri yardım başvurusu yapamaz.
+        <strong>Note:</strong> Admin and NGO members cannot apply for aid.
       </div>
 
       <form onSubmit={handleRegister}>
         <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#334155' }}>Kişisel Bilgiler</h3>
+          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#334155' }}>Personal Information</h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-                Ad Soyad *
+                Full Name *
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ahmet Yılmaz"
+                placeholder="John Doe"
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
               <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-                Telefon *
+                Phone *
               </label>
               <input
                 type="tel"
@@ -329,42 +329,42 @@ export function RecipientRegistration() {
 
           <div style={{ marginTop: '16px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              TC Kimlik No *
+              ID Number *
             </label>
             <input
               type="text"
               value={tcNo}
               onChange={(e) => setTcNo(e.target.value.replace(/\D/g, '').slice(0, 11))}
-              placeholder="11 haneli TC Kimlik numaranız"
+              placeholder="Your 11-digit ID number"
               maxLength={11}
               disabled={isSubmitting}
             />
             <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
-              TC Kimlik numaranız gizlilik için hashlenerek saklanır
+              Your ID number is hashed for privacy
             </p>
           </div>
         </div>
 
         <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#334155' }}>Konum ve Aile Bilgileri</h3>
+          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#334155' }}>Location and Family Information</h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-                Konum *
+                Location *
               </label>
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="İl, İlçe"
+                placeholder="City, District"
                 disabled={isSubmitting}
               />
             </div>
 
             <div>
               <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-                Aile Büyüklüğü
+                Family Size
               </label>
               <input
                 type="number"
@@ -379,12 +379,12 @@ export function RecipientRegistration() {
 
           <div style={{ marginTop: '16px' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontWeight: '500', fontSize: '14px' }}>
-              Durum Açıklaması
+              Situation Description
             </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Durumunuzu kısaca açıklayın (hasar durumu, özel ihtiyaçlar vb.)"
+              placeholder="Briefly describe your situation (damage, special needs, etc.)"
               disabled={isSubmitting}
               rows={3}
               style={{ width: '100%', resize: 'vertical' }}
@@ -393,11 +393,11 @@ export function RecipientRegistration() {
         </div>
 
         <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#334155' }}>Gerekli Belgeler</h3>
+          <h3 style={{ fontSize: '16px', marginBottom: '16px', color: '#334155' }}>Required Documents</h3>
           
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-              📄 İkametgah Belgesi * (e-Devlet'ten alınabilir)
+              📄 Residence Document * (can be obtained from e-Government)
             </label>
             <div style={{ 
               border: '2px dashed #e2e8f0', 
@@ -431,7 +431,7 @@ export function RecipientRegistration() {
                 ) : (
                   <div>
                     <div style={{ fontSize: '14px', color: '#64748b' }}>
-                      İkametgah belgenizi yükleyin
+                      Upload your residence document
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
                       PNG, JPG, PDF (max 10MB)
@@ -444,7 +444,7 @@ export function RecipientRegistration() {
 
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-              Gelir Belgesi * (Maaş bordrosu, SGK dökümü vb.)
+              Income Document * (Payslip, social security statement, etc.)
             </label>
             <div style={{ 
               border: '2px dashed #e2e8f0', 
@@ -478,7 +478,7 @@ export function RecipientRegistration() {
                 ) : (
                   <div>
                     <div style={{ fontSize: '14px', color: '#64748b' }}>
-                      Gelir belgenizi yükleyin
+                      Upload your income document
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
                       PNG, JPG, PDF (max 10MB)
@@ -489,10 +489,10 @@ export function RecipientRegistration() {
             </div>
           </div>
 
-          {/* Ekstra Belge (Opsiyonel) */}
+          {/* Extra Document (Optional) */}
           <div>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', fontSize: '14px' }}>
-              Ekstra Belge (Opsiyonel - Saglik raporu, engellilik belgesi vb.)
+              Extra Document (Optional - Health report, disability certificate, etc.)
             </label>
             <div style={{ 
               border: '2px dashed #e2e8f0', 
@@ -526,10 +526,10 @@ export function RecipientRegistration() {
                 ) : (
                   <div>
                     <div style={{ fontSize: '14px', color: '#64748b' }}>
-                      Ek belge yukleyin (opsiyonel)
+                      Upload extra document (optional)
                     </div>
                     <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
-                      Saglik raporu, engellilik belgesi, sosyal yardım kararı vb.
+                      Health report, disability certificate, social aid decision, etc.
                     </div>
                   </div>
                 )}
@@ -538,7 +538,7 @@ export function RecipientRegistration() {
           </div>
 
           <p style={{ fontSize: '12px', color: '#94a3b8', marginTop: '12px' }}>
-            Belgeleriniz Walrus decentralized storage'a yuklenir ve STK tarafindan incelenir.
+            Your documents will be uploaded to Walrus decentralized storage and reviewed by the NGO.
           </p>
         </div>
 
@@ -556,7 +556,7 @@ export function RecipientRegistration() {
         )}
 
         {message && (
-          <div className={`message ${message.includes('başarılı') || message.includes('🎉') ? 'message-success' : 'message-error'}`}>
+          <div className={`message ${message.includes('successful') || message.includes('🎉') ? 'message-success' : 'message-error'}`}>
             {message}
           </div>
         )}
@@ -574,10 +574,10 @@ export function RecipientRegistration() {
           }}
         >
           {!currentAccount 
-            ? 'Önce Cüzdan Bağlayın' 
+            ? 'Connect Wallet First' 
             : isSubmitting 
-              ? (useSponsored && sponsoredEnabled ? '⛽ Gas-Free Kaydediliyor...' : 'Kaydediliyor...') 
-              : (useSponsored && sponsoredEnabled ? '⛽ Gas-Free Başvuru Yap' : 'Başvuru Yap')}
+              ? (useSponsored && sponsoredEnabled ? '⛽ Gas-Free Registering...' : 'Registering...') 
+              : (useSponsored && sponsoredEnabled ? '⛽ Gas-Free Apply' : 'Apply')}
         </button>
       </form>
     </div>

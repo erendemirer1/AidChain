@@ -148,21 +148,21 @@ export function RecipientVerification() {
                 (c: any) => c.type === 'created' && c.objectType?.includes('AidRegistry')
               );
               if (created && 'objectId' in created) {
-                setMessage(`Yeni Registry oluşturuldu! ID: ${created.objectId} - config.ts'yi güncelle!`);
+                setMessage(`Yeni Registry created! ID: ${created.objectId} - Please update config.ts!`);
               } else {
-                setMessage('Registry oluşturuldu!');
+                setMessage('Registry created!');
               }
             } else {
-              setMessage('İşlem başarısız');
+              setMessage('Transaction failed');
             }
           },
           onError: (error) => {
-            setMessage(`Hata: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
           },
         }
       );
     } catch (error) {
-      setMessage(`Hata: ${(error as Error).message}`);
+      setMessage(`Error: ${(error as Error).message}`);
     } finally {
       setCreatingRegistry(false);
     }
@@ -197,19 +197,19 @@ export function RecipientVerification() {
             });
 
             if (status.effects?.status?.status === 'success') {
-              setMessage(`${name} onaylandı`);
+              setMessage(`${name} verified`);
               loadUnverifiedRecipients();
             } else {
-              setMessage('İşlem başarısız');
+              setMessage('Transaction failed');
             }
           },
           onError: (error) => {
-            setMessage(`Hata: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
           },
         }
       );
     } catch (error) {
-      setMessage(`Hata: ${(error as Error).message}`);
+      setMessage(`Error: ${(error as Error).message}`);
     } finally {
       setVerifying(null);
     }
@@ -226,7 +226,7 @@ export function RecipientVerification() {
   if (!isCoordinator) {
     return (
       <div className="card">
-        <h2>STK Onay Paneli</h2>
+        <h2>NGO Verification Panel</h2>
 
         <div style={{
           padding: '20px',
@@ -236,21 +236,21 @@ export function RecipientVerification() {
           border: '1px solid #fcd34d',
         }}>
           <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>
-            Yetkisiz Erişim
+            Unauthorized Access
           </div>
           <div style={{ fontSize: '14px', color: '#78350f', marginBottom: '12px' }}>
-            Bu paneli kullanmak için registry admin'i olmanız gerekiyor.
+            You must be a registry admin to use this panel.
           </div>
 
           {registryAdmin && (
             <div style={{ fontSize: '13px', color: '#92400e', marginBottom: '8px' }}>
-              Mevcut Admin: <code style={{ background: '#fde68a', padding: '2px 6px', borderRadius: '4px' }}>{shortenAddress(registryAdmin)}</code>
+              Current Admin: <code style={{ background: '#fde68a', padding: '2px 6px', borderRadius: '4px' }}>{shortenAddress(registryAdmin)}</code>
             </div>
           )}
 
           {currentAccount && (
             <div style={{ fontSize: '13px', color: '#92400e' }}>
-              Sizin Adresiniz: <code style={{ background: '#fde68a', padding: '2px 6px', borderRadius: '4px' }}>{shortenAddress(currentAccount.address)}</code>
+              Your Address: <code style={{ background: '#fde68a', padding: '2px 6px', borderRadius: '4px' }}>{shortenAddress(currentAccount.address)}</code>
             </div>
           )}
         </div>
@@ -262,16 +262,16 @@ export function RecipientVerification() {
           border: '1px solid #86efac',
         }}>
           <div style={{ fontWeight: '600', color: '#166534', marginBottom: '8px' }}>
-            Kendi Registry'nizi Oluşturun
+            Create Your Own Registry
           </div>
           <div style={{ fontSize: '14px', color: '#15803d', marginBottom: '16px' }}>
-            Yeni bir registry oluşturarak admin olabilirsiniz. Sonra config.ts'yi güncellemeniz gerekecek.
+            You can become an admin by creating a new registry. You will need to update config.ts afterwards.
           </div>
 
           {message && (
             <div style={{
               padding: '12px',
-              background: message.includes('oluşturuldu') ? '#dcfce7' : '#fee2e2',
+              background: message.includes('created') ? '#dcfce7' : '#fee2e2',
               borderRadius: '8px',
               marginBottom: '12px',
               fontSize: '13px',
@@ -297,7 +297,7 @@ export function RecipientVerification() {
               opacity: creatingRegistry ? 0.7 : 1,
             }}
           >
-            {creatingRegistry ? 'Oluşturuluyor...' : 'Yeni Registry Oluştur'}
+            {creatingRegistry ? 'Creating...' : 'Create New Registry'}
           </button>
         </div>
       </div>
@@ -307,25 +307,25 @@ export function RecipientVerification() {
   return (
     <div className="card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h2 style={{ margin: 0 }}>Onay Bekleyen Başvurular</h2>
+        <h2 style={{ margin: 0 }}>Pending Verification Applications</h2>
         <button onClick={loadUnverifiedRecipients} className="btn-primary" style={{ padding: '10px 20px' }}>
-          Yenile
+          Refresh
         </button>
       </div>
 
       {message && (
-        <div className={`message ${message.includes('onaylandı') ? 'message-success' : 'message-error'}`}>
+        <div className={`message ${message.includes('verified') ? 'message-success' : 'message-error'}`}>
           {message}
         </div>
       )}
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
-          Yükleniyor...
+          Loading...
         </div>
       ) : unverifiedRecipients.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
-          Onay bekleyen başvuru bulunmuyor
+          No pending verification applications
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -363,7 +363,7 @@ export function RecipientVerification() {
                   background: '#fef3c7',
                   color: '#92400e',
                 }}>
-                  Onay Bekliyor
+                  Pending Verification
                 </div>
               </div>
 
@@ -376,7 +376,7 @@ export function RecipientVerification() {
                 }}>
                   <div style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px' }}>
                     <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>
-                      Telefon
+                      Phone
                     </div>
                     <div style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
                       {recipient.phone || '-'}
@@ -384,10 +384,10 @@ export function RecipientVerification() {
                   </div>
                   <div style={{ padding: '12px', background: '#f9fafb', borderRadius: '8px' }}>
                     <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>
-                      Aile Büyüklüğü
+                      Family Size
                     </div>
                     <div style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
-                      {recipient.familySize} kişi
+                      {recipient.familySize} people
                     </div>
                   </div>
                 </div>
@@ -400,7 +400,7 @@ export function RecipientVerification() {
                     marginBottom: '16px',
                   }}>
                     <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>
-                      Açıklama
+                      Description
                     </div>
                     <div style={{ fontSize: '14px', color: '#374151' }}>
                       {recipient.description}
@@ -408,10 +408,10 @@ export function RecipientVerification() {
                   </div>
                 )}
 
-                {/* Belgeler */}
+                {/* Documents */}
                 <div style={{ marginBottom: '16px' }}>
                   <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '8px', textTransform: 'uppercase' }}>
-                    Yüklenen Belgeler (Walrus)
+                    Uploaded Documents (Walrus)
                   </div>
                   
                   <div style={{ display: 'flex', gap: '12px' }}>
@@ -432,7 +432,7 @@ export function RecipientVerification() {
                           border: '1px solid #86efac',
                         }}
                       >
-                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>📄 İkametgah Belgesi</div>
+                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>📄 Residence Document</div>
                         <div style={{ fontSize: '10px', fontFamily: 'monospace', color: '#15803d' }}>
                           {recipient.residenceBlobId.slice(0, 16)}...
                         </div>
@@ -456,7 +456,7 @@ export function RecipientVerification() {
                           border: '1px solid #93c5fd',
                         }}
                       >
-                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>Gelir Belgesi</div>
+                        <div style={{ fontWeight: '600', marginBottom: '4px' }}>Income Document</div>
                         <div style={{ fontSize: '10px', fontFamily: 'monospace', color: '#1d4ed8' }}>
                           {recipient.incomeBlobId.slice(0, 16)}...
                         </div>
@@ -481,7 +481,7 @@ export function RecipientVerification() {
                     opacity: verifying === recipient.id ? 0.7 : 1,
                   }}
                 >
-                  {verifying === recipient.id ? 'Onaylanıyor...' : 'Onayla'}
+                  {verifying === recipient.id ? 'Verifying...' : 'Verify'}
                 </button>
               </div>
             </div>

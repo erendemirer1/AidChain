@@ -163,10 +163,10 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
           (p): p is RecipientProfile => p !== null
         );
 
-        // Tüm alıcıları sakla (istatistikler için)
+        // Store all recipients (for stats)
         setAllRecipients(profiles);
 
-        // Gösterilecek listeyi ayarla
+        // Set display list
         let filtered = profiles;
         if (showVerifiedOnly) {
           filtered = profiles.filter(p => p.isVerified);
@@ -176,7 +176,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
       }
     } catch (err) {
       console.error('Error loading recipients:', err);
-      setError('Alicilar yuklenirken hata olustu');
+      setError('Error loading recipients');
     } finally {
       setLoading(false);
     }
@@ -192,7 +192,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
   const shortenAddress = (addr: string) => `${addr.slice(0, 8)}...${addr.slice(-6)}`;
 
   const filteredRecipients = getFilteredRecipients();
-  // İstatistikler için TÜM alıcıları kullan (showVerifiedOnly olsa bile)
+  // Use ALL recipients for stats (even if showVerifiedOnly)
   const verifiedCount = allRecipients.filter(r => r.isVerified).length;
   const pendingCount = allRecipients.filter(r => !r.isVerified).length;
   const totalCount = allRecipients.length;
@@ -210,7 +210,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
             margin: '0 auto 16px',
             animation: 'spin 1s linear infinite',
           }}/>
-          <p style={{ color: '#6b7280', margin: 0 }}>Alicilar yukleniyor...</p>
+          <p style={{ color: '#6b7280', margin: 0 }}>Loading recipients...</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
@@ -254,10 +254,10 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
       }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '20px', color: '#111827' }}>
-            {showVerifiedOnly ? 'Dogrulanmis Alicilar' : 'Tum Alicilar'}
+            {showVerifiedOnly ? 'Verified Recipients' : 'All Recipients'}
           </h2>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
-            {totalCount} kayitli alici
+            {totalCount} registered recipients
           </p>
         </div>
         <button
@@ -277,7 +277,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
           }}
         >
           {Icons.refresh}
-          Yenile
+          Refresh
         </button>
       </div>
 
@@ -295,7 +295,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
           border: '1px solid #bbf7d0',
         }}>
           <div style={{ fontSize: '24px', fontWeight: '700', color: '#166534' }}>{verifiedCount}</div>
-          <div style={{ fontSize: '13px', color: '#15803d' }}>Dogrulanmis</div>
+          <div style={{ fontSize: '13px', color: '#15803d' }}>Verified</div>
         </div>
         <div style={{
           padding: '16px',
@@ -304,7 +304,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
           border: '1px solid #fef08a',
         }}>
           <div style={{ fontSize: '24px', fontWeight: '700', color: '#854d0e' }}>{pendingCount}</div>
-          <div style={{ fontSize: '13px', color: '#a16207' }}>Bekleyen</div>
+          <div style={{ fontSize: '13px', color: '#a16207' }}>Pending</div>
         </div>
         <div style={{
           padding: '16px',
@@ -313,7 +313,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
           border: '1px solid #bfdbfe',
         }}>
           <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af' }}>{totalCount}</div>
-          <div style={{ fontSize: '13px', color: '#1d4ed8' }}>Toplam</div>
+          <div style={{ fontSize: '13px', color: '#1d4ed8' }}>Total</div>
         </div>
       </div>
 
@@ -328,9 +328,9 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
           borderRadius: '10px',
         }}>
           {[
-            { key: 'all', label: 'Tumu' },
-            { key: 'verified', label: 'Dogrulanmis' },
-            { key: 'pending', label: 'Bekleyen' },
+            { key: 'all', label: 'All' },
+            { key: 'verified', label: 'Verified' },
+            { key: 'pending', label: 'Pending' },
           ].map(({ key, label }) => (
             <button
               key={key}
@@ -364,9 +364,9 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
         }}>
           <div style={{ color: '#9ca3af', marginBottom: '8px' }}>{Icons.users}</div>
           <p style={{ color: '#6b7280', margin: 0 }}>
-            {filter === 'verified' ? 'Dogrulanmis alici bulunmuyor' : 
-             filter === 'pending' ? 'Bekleyen basvuru bulunmuyor' : 
-             'Henuz kayitli alici bulunmuyor'}
+            {filter === 'verified' ? 'No verified recipients found' : 
+             filter === 'pending' ? 'No pending applications found' : 
+             'No registered recipients yet'}
           </p>
         </div>
       ) : (
@@ -440,7 +440,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                           fontSize: '11px',
                           fontWeight: '600',
                         }}>
-                          {Icons.check} Dogrulanmis
+                          {Icons.check} Verified
                         </span>
                       )}
                       {!recipient.isVerified && (
@@ -455,7 +455,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                           fontSize: '11px',
                           fontWeight: '600',
                         }}>
-                          {Icons.clock} Bekliyor
+                          {Icons.clock} Pending
                         </span>
                       )}
                     </div>
@@ -487,7 +487,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                     WebkitBoxOrient: 'vertical',
                     overflow: 'hidden',
                   }}>
-                    <strong>Durumu:</strong> {recipient.description}
+                    <strong>Status:</strong> {recipient.description}
                   </div>
                 </div>
               )}
@@ -511,7 +511,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                   }}>
                     <div style={{ color: '#6b7280' }}>{Icons.location}</div>
                     <div>
-                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Konum</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Location</div>
                       <div style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{recipient.location}</div>
                     </div>
                   </div>
@@ -525,7 +525,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                   }}>
                     <div style={{ color: '#6b7280' }}>{Icons.phone}</div>
                     <div>
-                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Telefon</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Phone</div>
                       <div style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{recipient.phone || '-'}</div>
                     </div>
                   </div>
@@ -539,8 +539,8 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                   }}>
                     <div style={{ color: '#6b7280' }}>{Icons.users}</div>
                     <div>
-                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Aile</div>
-                      <div style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{recipient.familySize} kisi</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Family</div>
+                      <div style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{recipient.familySize} people</div>
                     </div>
                   </div>
                   <div style={{
@@ -553,7 +553,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                   }}>
                     <div style={{ color: '#6b7280' }}>{Icons.package}</div>
                     <div>
-                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Alinan Paket</div>
+                      <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' }}>Packages Received</div>
                       <div style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{recipient.receivedPackagesCount}</div>
                     </div>
                   </div>
@@ -569,7 +569,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                     borderLeft: '3px solid #667eea',
                   }}>
                     <div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '4px', textTransform: 'uppercase' }}>
-                      Aciklama
+                      Description
                     </div>
                     <div style={{ fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
                       {recipient.description}
@@ -636,7 +636,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                       }}
                     >
                       {Icons.file}
-                      Ikametgah
+                      Residence
                       {Icons.externalLink}
                     </a>
                   )}
@@ -660,7 +660,7 @@ export function RecipientList({ onSelectRecipient, showVerifiedOnly = true }: Re
                       }}
                     >
                       {Icons.file}
-                      Gelir Belgesi
+                      Income
                       {Icons.externalLink}
                     </a>
                   )}

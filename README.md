@@ -1,41 +1,47 @@
-# 🌍 AidChain - Blockchain Tabanlı Yardım Platformu
+# 🌍 AidChain - Blockchain-Based Aid Platform
 
-Afet ve kriz durumlarında şeffaf, güvenli ve denetlenebilir yardım dağıtımı için Sui blockchain üzerine inşa edilmiş bir platform.
+A platform built on Sui blockchain for transparent, secure and auditable aid distribution during disasters and crisis situations.
 
-## ✨ Özellikler
+## ✨ Features
 
-### 🔒 **Escrow Güvenliği**
-- Bağışlar pakette güvenle kilitlenir
-- Teslim edilene kadar koordinatör erişemez
-- Teslim edilmezse bağışçı geri alabilir
-- Blockchain üzerinde tam şeffaflık
+### 🔒 **Escrow Security**
+- Donations are safely locked in package
+- Coordinator cannot access until delivery
+- Donor can refund if not delivered
+- Full transparency on blockchain
 
-### 📦 **Paket Yönetimi**
-- Koordinatörler yardım paketleri oluşturur
-- Her paketin benzersiz ID'si vardır
-- Gerçek zamanlı durum takibi
-- Sui Explorer entegrasyonu
+### 📦 **Package Management**
+- Coordinators create aid packages
+- Each package has unique ID
+- Real-time status tracking
+- Sui Explorer integration
 
-### 💰 **Güvenli Bağış**
-- Wallet entegrasyonu (Sui Wallet, Ethos vb.)
-- Transaction doğrulama
-- Escrow durumu görüntüleme
-- Başarısız işlemler otomatik tespit edilir
+### 💰 **Secure Donations**
+- Wallet integration (Sui Wallet, Ethos etc.)
+- Transaction verification
+- Escrow status viewing
+- Failed transactions auto-detected
 
-### 👥 **Şeffaf İzleme**
-- Tüm işlemler blockchain'de
-- Herkes doğrulayabilir
-- Koordinatör paneli ile yönetim
+### 👥 **Transparent Tracking**
+- All transactions on blockchain
+- Anyone can verify
+- Coordinator panel management
 - Delivery tracking
 
-## 🚀 Hızlı Başlangıç
+### ⛽ **Gas-Free Transactions (Enoki Sponsored)**
+- Zero gas fee for users
+- Sponsored by platform
+- Hackathon bonus feature
+- Seamless user experience
 
-### Gereksinimler
+## 🚀 Quick Start
+
+### Requirements
 - Node.js 18+
-- Sui CLI (smart contract deployment için)
-- Sui Wallet tarayıcı eklentisi
+- Sui CLI (for smart contract deployment)
+- Sui Wallet browser extension
 
-### Frontend Kurulumu
+### Frontend Setup
 
 ```bash
 cd frontend
@@ -43,7 +49,18 @@ npm install
 npm run dev
 ```
 
-Uygulama http://localhost:5173 adresinde çalışacaktır.
+Application will run at http://localhost:5173
+
+### Backend Setup (for Sponsored Transactions)
+
+```bash
+cd backend
+npm install
+# Add your Enoki private key to .env
+npm run dev
+```
+
+Backend runs on http://localhost:3001
 
 ### Smart Contract Deployment
 
@@ -53,50 +70,59 @@ sui move build
 sui client publish --gas-budget 100000000
 ```
 
-Deployment sonrası:
-1. Package ID'yi kopyalayın
-2. Registry object ID'yi bulun
-3. `frontend/src/config.ts` dosyasını güncelleyin
+After deployment:
+1. Copy the Package ID
+2. Find the Registry object ID
+3. Update `frontend/src/config.ts`
 
-## 📝 Kullanım
+## 📝 Usage
 
-### Koordinatör Olarak
+### As Coordinator
 
-1. **Paket Oluştur**
-   ```typescript
-   // CoordinatorPanel'de "Paket Oluştur" butonuna tıklayın
-   // Açıklama, konum ve hedef tutarı girin
-   ```
+1. **Create Package**
+   - Click "Create Package" in CoordinatorPanel
+   - Enter description, location and target amount
 
-2. **Bağışları İzle**
-   - Aktif paketlerde escrow durumu görünür
-   - 🔒 Kilitli: Henüz teslim edilmedi
-   - ✓ Serbest: Koordinatöre aktarıldı
+2. **Monitor Donations**
+   - Escrow status visible in active packages
+   - 🔒 Locked: Not yet delivered
+   - ✓ Released: Transferred to coordinator
 
-3. **Paketi Teslim Et**
-   ```typescript
-   // "Teslim Edildi Olarak İşaretle" butonuna tıklayın
-   // Escrow serbest bırakılır
-   ```
+3. **Deliver Package**
+   - Click "Mark as Delivered"
+   - Escrow is released
 
-### Bağışçı Olarak
+### As Donor
 
-1. **Paket Seç**
-   - Ana sayfada aktif paketleri görüntüleyin
-   - Paket detaylarını inceleyin
+1. **Select Package**
+   - View active packages on main page
+   - Review package details
 
-2. **Bağış Yap**
-   ```typescript
-   // Bağış miktarını girin (min: 0.001 SUI)
-   // Wallet'ı bağlayın ve onayla
-   ```
+2. **Make Donation**
+   - Enter donation amount (min: 0.001 SUI)
+   - Connect wallet and confirm
+   - Gas-free with sponsored transactions!
 
-3. **Escrow Doğrula**
-   - Bağış sonrası "Explorer'da Görüntüle" linkine tıklayın
-   - `locked_donation` field'ını kontrol edin
-   - Detaylı rehber: [ESCROW_DOGRULAMA.md](./ESCROW_DOGRULAMA.md)
+3. **Verify Escrow**
+   - Click "View in Explorer" after donation
+   - Check `locked_donation` field
 
-## 🏗️ Proje Yapısı
+### As Aid Recipient
+
+1. **Register for Aid**
+   - Fill out the registration form
+   - Upload required documents (Residence, Income)
+   - Documents stored on Walrus decentralized storage
+
+2. **Wait for Verification**
+   - NGO/DAO members review your application
+   - Verification through DAO voting process
+
+3. **Receive Aid**
+   - Once verified, you can receive donations
+   - Mark packages as received
+
+## 🏗️ Project Structure
 
 ```
 aidchain/
@@ -107,17 +133,26 @@ aidchain/
 │       └── Move.toml
 ├── frontend/
 │   ├── src/
-│   │   ├── DonationApp.tsx        # Ana bağış ekranı
-│   │   ├── CoordinatorPanel.tsx   # Koordinatör paneli
-│   │   ├── DonationForm.tsx       # Bağış formu
+│   │   ├── DonationApp.tsx        # Main donation screen
+│   │   ├── CoordinatorPanel.tsx   # Coordinator panel
+│   │   ├── DonationForm.tsx       # Donation form
+│   │   ├── DAOPanel.tsx           # DAO voting panel
+│   │   ├── Dashboard.tsx          # Statistics dashboard
+│   │   ├── RecipientRegistration.tsx # Aid application
+│   │   ├── RecipientList.tsx      # Recipients list
+│   │   ├── VerifierManagement.tsx # DAO member management
+│   │   ├── useSponsoredTransaction.ts # Gas-free hook
 │   │   ├── buildDonateTx.ts       # Transaction builder
 │   │   ├── config.ts              # Blockchain config
-│   │   └── style.css              # UI tasarımı
+│   │   └── style.css              # UI design
 │   └── index.html
-└── ESCROW_DOGRULAMA.md            # Escrow rehberi
+├── backend/
+│   ├── server.js                  # Enoki sponsor proxy
+│   └── .env                       # Private API key
+└── README.md
 ```
 
-## 🔧 Teknolojiler
+## 🔧 Technologies
 
 ### Frontend
 - **React 19.2.0**: Modern UI framework
@@ -126,10 +161,17 @@ aidchain/
 - **@mysten/dapp-kit 0.19.9**: Sui wallet integration
 - **@mysten/sui 1.45.0**: Sui SDK
 
+### Backend
+- **Express.js**: API server
+- **@mysten/enoki**: Sponsored transactions
+
 ### Blockchain
 - **Sui Blockchain**: High-performance L1
 - **Move Language**: Safe smart contracts
 - **Testnet**: Development and testing
+
+### Storage
+- **Walrus**: Decentralized document storage
 
 ### Design
 - CSS Variables
@@ -138,21 +180,22 @@ aidchain/
 - Glassmorphism Effects
 - Responsive Grid
 
-## 🛡️ Güvenlik
+## 🛡️ Security
 
-### Smart Contract Güvenliği
-- ✅ Escrow pattern ile bağış kilitleme
-- ✅ Şartlı serbest bırakma (delivery required)
-- ✅ Refund mekanizması
-- ✅ Access control (koordinatör yetkisi)
+### Smart Contract Security
+- ✅ Escrow pattern for donation locking
+- ✅ Conditional release (delivery required)
+- ✅ Refund mechanism
+- ✅ Access control (coordinator permissions)
+- ✅ DAO-based verification
 
-### Frontend Güvenliği
+### Frontend Security
 - ✅ Transaction effects validation
 - ✅ Balance checking
 - ✅ Error handling
 - ✅ User feedback
 
-### Doğrulama
+### Verification
 ```bash
 # Smart contract test
 cd contracts/aidchain
@@ -165,100 +208,24 @@ npm run build
 
 ## 📊 Deployed Instances
 
-### Testnet (V2 - Gelişmiş Escrow Sistemi)
-- **Package ID**: `0x25e720914e3a022de71e49469d1b38787fd08293bb6756c2dad838847ff12aff`
-- **Registry ID**: `0xc31120749a5e25dae01d0b8f3094188ab67911546828cde189c791e4d69130ff`
+### Testnet (V10 - Latest)
+- **Package ID**: `0x1157d993f30167c9d5552d61d5a0e838871f6fe3b1e36312beeb5b8825891ce1`
+- **Registry ID**: `0x5763027400406393cc10ae18707cb9b9e087ddf618f550db57fc924474608e49`
 - **Network**: Sui Testnet
 - **Explorer**: https://testnet.suivision.xyz/
 
-### 📍 Registry ID Nasıl Bulunur?
+### Sponsor Address (Enoki)
+- **Address**: `0x0dec4c7d041b07e655637e0dd0f9010bd7701f7613c66894d898795a54431290`
 
-Registry ID **frontend'e zaten gömülü** (`src/config.ts`). Kullanıcıların manuel olarak girmesine gerek yok!
+## 🎯 Hackathon Features
 
-**Opsiyonel:** Farklı bir registry kullanmak istersen:
+- ✅ **Sui Blockchain Integration** - Smart contracts in Move
+- ✅ **Enoki Sponsored Gas** - Gas-free user experience
+- ✅ **Walrus Storage** - Decentralized document storage
+- ✅ **DAO Governance** - Decentralized verification voting
+- ✅ **Escrow System** - Secure fund management
+- ✅ **Modern UI/UX** - Clean, responsive design
 
-1. **Sui CLI ile sorgulama**:
-```bash
-sui client object 0xc31120749a5e25dae01d0b8f3094188ab67911546828cde189c791e4d69130ff
-```
+## 📄 License
 
-2. **SuiVision'da görüntüleme**:
-```
-https://testnet.suivision.xyz/object/0xc31120749a5e25dae01d0b8f3094188ab67911546828cde189c791e4d69130ff
-```
-
-3. **Coordinator Panel'de değiştirme**:
-   - UI'da "Registry ID (İsteğe Bağlı Değiştir)" alanından güncelleyebilirsin
-   - Default registry tüm paketleri içerir
-
-### 🔄 Yeni Registry Oluşturma (STK'lar için):
-
-Kendi bağımsız registry'nizi oluşturmak isterseniz:
-
-```bash
-sui client call \
-  --package 0x25e720914e3a022de71e49469d1b38787fd08293bb6756c2dad838847ff12aff \
-  --module aidchain \
-  --function init_registry \
-  --gas-budget 10000000
-```
-
-Dönen `ObjectID`'yi kopyala ve `src/config.ts`'e ekle.
-
-## 🎨 UI Tasarım
-
-- **Primary Color**: Purple gradient (667eea → 764ba2)
-- **Cards**: White with subtle shadow, 16px border radius
-- **Buttons**: Gradient hover effects, smooth transitions
-- **Alerts**: Info (blue), Success (green), Error (red)
-- **Typography**: Inter font family, responsive sizes
-- **Responsive**: Mobile-first, adapts to all screens
-
-## 📚 Dökümantasyon
-
-- [Escrow Doğrulama Rehberi](./ESCROW_DOGRULAMA.md)
-- [Sui Move Documentation](https://docs.sui.io/concepts/sui-move-concepts)
-- [@mysten/dapp-kit Docs](https://sdk.mystenlabs.com/dapp-kit)
-
-## 🐛 Sorun Giderme
-
-### Build Hatası
-```bash
-# Dependencies'i temizle ve yeniden yükle
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Transaction Başarısız
-- Wallet'ta yeterli SUI balance olduğunu kontrol edin
-- Gas fee için ~0.01 SUI ekstra bırakın
-- Transaction effects'te hata mesajını kontrol edin
-
-### Escrow Görünmüyor
-- [ESCROW_DOGRULAMA.md](./ESCROW_DOGRULAMA.md) rehberini takip edin
-- Sui Explorer'da "Fields" sekmesine bakın
-- Package object ID'yi doğru kopyaladığınızdan emin olun
-
-## 🤝 Katkıda Bulunma
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## 📄 Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır.
-
-## 🙏 Teşekkürler
-
-- [Sui Foundation](https://sui.io/) - Blockchain infrastructure
-- [Mysten Labs](https://mystenlabs.com/) - SDK and tools
-- Community contributors
-
----
-
-**Güven değil, kod!** 🔒✨
-
-Built with ❤️ for transparent aid distribution
+MIT License - see LICENSE file for details.

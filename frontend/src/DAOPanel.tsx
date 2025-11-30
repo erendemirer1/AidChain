@@ -44,10 +44,10 @@ interface DAOConfig {
 }
 
 const PROPOSAL_STATUS = {
-  0: { label: 'Bekliyor', color: '#f59e0b', bg: '#fef3c7' },
-  1: { label: 'Onaylandı', color: '#059669', bg: '#d1fae5' },
-  2: { label: 'Reddedildi', color: '#dc2626', bg: '#fee2e2' },
-  3: { label: 'Süresi Doldu', color: '#6b7280', bg: '#f3f4f6' },
+  0: { label: 'Pending', color: '#f59e0b', bg: '#fef3c7' },
+  1: { label: 'Approved', color: '#059669', bg: '#d1fae5' },
+  2: { label: 'Rejected', color: '#dc2626', bg: '#fee2e2' },
+  3: { label: 'Expired', color: '#6b7280', bg: '#f3f4f6' },
 };
 
 export function DAOPanel() {
@@ -265,20 +265,20 @@ export function DAOPanel() {
             });
 
             if (status.effects?.status?.status === 'success') {
-              setMessage('Öneri oluşturuldu! Diğer verifier\'lar oy verebilir.');
+              setMessage('Proposal created! Other verifiers can vote.');
               loadPendingProfiles();
               loadActiveProposals();
             } else {
-              setMessage('İşlem başarısız');
+              setMessage('Transaction failed');
             }
           },
           onError: (error) => {
-            setMessage(`Hata: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
           },
         }
       );
     } catch (error) {
-      setMessage(`Hata: ${(error as Error).message}`);
+      setMessage(`Error: ${(error as Error).message}`);
     } finally {
       setCreatingProposal(null);
     }
@@ -314,19 +314,19 @@ export function DAOPanel() {
             });
 
             if (status.effects?.status?.status === 'success') {
-              setMessage(voteFor ? 'Lehte oy verildi!' : 'Aleyhte oy verildi!');
+              setMessage(voteFor ? 'Voted in favor!' : 'Voted against!');
               loadActiveProposals();
             } else {
-              setMessage('İşlem başarısız');
+              setMessage('Transaction failed');
             }
           },
           onError: (error) => {
-            setMessage(`Hata: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
           },
         }
       );
     } catch (error) {
-      setMessage(`Hata: ${(error as Error).message}`);
+      setMessage(`Error: ${(error as Error).message}`);
     } finally {
       setVoting(null);
     }
@@ -362,20 +362,20 @@ export function DAOPanel() {
             });
 
             if (status.effects?.status?.status === 'success') {
-              setMessage('Öneri yürütüldü!');
+              setMessage('Proposal executed!');
               loadPendingProfiles();
               loadActiveProposals();
             } else {
-              setMessage('İşlem başarısız');
+              setMessage('Transaction failed');
             }
           },
           onError: (error) => {
-            setMessage(`Hata: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
           },
         }
       );
     } catch (error) {
-      setMessage(`Hata: ${(error as Error).message}`);
+      setMessage(`Error: ${(error as Error).message}`);
     } finally {
       setExecuting(null);
     }
@@ -401,15 +401,15 @@ export function DAOPanel() {
   if (!canVote) {
     return (
       <div className="card">
-        <h2>DAO Oylama Paneli</h2>
+        <h2>DAO Voting Panel</h2>
         <div style={{ padding: '20px', background: '#fef3c7', borderRadius: '12px', border: '1px solid #fcd34d' }}>
-          <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>Yetkisiz Erişim</div>
+          <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>Unauthorized Access</div>
           <div style={{ fontSize: '14px', color: '#78350f' }}>
-            Bu paneli kullanmak için verifier olmanız gerekiyor.
+            You need to be a verifier to use this panel.
           </div>
           {currentAccount && (
             <div style={{ marginTop: '12px', fontSize: '13px', color: '#92400e' }}>
-              Adresiniz: <code style={{ background: '#fde68a', padding: '2px 6px', borderRadius: '4px' }}>
+              Your address: <code style={{ background: '#fde68a', padding: '2px 6px', borderRadius: '4px' }}>
                 {shortenAddress(currentAccount.address)}
               </code>
             </div>
@@ -423,14 +423,14 @@ export function DAOPanel() {
     <div className="card">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
-          <h2 style={{ margin: 0 }}>DAO Oylama Paneli</h2>
+          <h2 style={{ margin: 0 }}>DAO Voting Panel</h2>
           <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
             {isAdmin ? 'Admin' : '✓ Verifier'} • {verifiers.length} verifier • Epoch: {currentEpoch}
           </div>
         </div>
         <button onClick={() => { loadPendingProfiles(); loadActiveProposals(); loadCurrentEpoch(); }} 
           className="btn-primary" style={{ padding: '10px 20px' }}>
-          Yenile
+          Refresh
         </button>
       </div>
 
@@ -443,11 +443,11 @@ export function DAOPanel() {
           marginBottom: '20px',
           border: '1px solid #bae6fd',
         }}>
-          <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '8px' }}>DAO Ayarları</div>
+          <div style={{ fontWeight: '600', color: '#0369a1', marginBottom: '8px' }}>DAO Settings</div>
           <div style={{ display: 'flex', gap: '24px', fontSize: '14px', color: '#0c4a6e' }}>
-            <span>Oylama Süresi: <strong>{daoConfig.votingPeriodEpochs} epoch</strong></span>
+            <span>Voting Period: <strong>{daoConfig.votingPeriodEpochs} epoch</strong></span>
             <span>Quorum: <strong>%{daoConfig.quorumPercent}</strong></span>
-            <span>Onay Eşiği: <strong>%{daoConfig.approvalPercent}</strong></span>
+            <span>Approval Threshold: <strong>%{daoConfig.approvalPercent}</strong></span>
           </div>
         </div>
       )}
@@ -468,7 +468,7 @@ export function DAOPanel() {
       {activeProposals.length > 0 && (
         <div style={{ marginBottom: '32px' }}>
           <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#1f2937' }}>
-            Aktif Öneriler ({activeProposals.length})
+            Active Proposals ({activeProposals.length})
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {activeProposals.map((proposal) => {
@@ -496,10 +496,10 @@ export function DAOPanel() {
                   }}>
                     <div>
                       <div style={{ fontWeight: '600', fontSize: '16px', color: '#111827' }}>
-                        {profile?.name || 'Yükleniyor...'}
+                        {profile?.name || 'Loading...'}
                       </div>
                       <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '2px' }}>
-                        Öneren: {shortenAddress(proposal.proposer)}
+                        Proposer: {shortenAddress(proposal.proposer)}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -514,7 +514,7 @@ export function DAOPanel() {
                         {statusInfo.label}
                       </div>
                       <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                        {timeLeft > 0 ? `${timeLeft} epoch kaldı` : 'Süre doldu'}
+                        {timeLeft > 0 ? `${timeLeft} epochs remaining` : 'Time expired'}
                       </div>
                     </div>
                   </div>
@@ -531,13 +531,13 @@ export function DAOPanel() {
                         <div style={{ fontSize: '24px', fontWeight: '700', color: '#059669' }}>
                           {proposal.votesFor.length}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#065f46' }}>Lehte</div>
+                        <div style={{ fontSize: '12px', color: '#065f46' }}>For</div>
                       </div>
                       <div style={{ padding: '12px', background: '#fee2e2', borderRadius: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '24px', fontWeight: '700', color: '#dc2626' }}>
                           {proposal.votesAgainst.length}
                         </div>
-                        <div style={{ fontSize: '12px', color: '#991b1b' }}>Aleyhte</div>
+                        <div style={{ fontSize: '12px', color: '#991b1b' }}>Against</div>
                       </div>
                       <div style={{ padding: '12px', background: '#f3f4f6', borderRadius: '8px', textAlign: 'center' }}>
                         <div style={{ fontSize: '24px', fontWeight: '700', color: '#374151' }}>
@@ -550,8 +550,8 @@ export function DAOPanel() {
                     {/* Progress Bar */}
                     <div style={{ marginBottom: '16px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-                        <span>Onay İlerlemesi</span>
-                        <span>{proposal.votesFor.length}/{approvalNeeded} oy gerekli</span>
+                        <span>Approval Progress</span>
+                        <span>{proposal.votesFor.length}/{approvalNeeded} votes needed</span>
                       </div>
                       <div style={{ height: '8px', background: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
                         <div style={{
@@ -582,7 +582,7 @@ export function DAOPanel() {
                               opacity: voting === proposal.id ? 0.7 : 1,
                             }}
                           >
-                            Lehte Oy Ver
+                            Vote For
                           </button>
                           <button
                             onClick={() => handleVote(proposal.id, false)}
@@ -599,7 +599,7 @@ export function DAOPanel() {
                               opacity: voting === proposal.id ? 0.7 : 1,
                             }}
                           >
-                            Aleyhte Oy Ver
+                            Vote Against
                           </button>
                         </>
                       )}
@@ -613,7 +613,7 @@ export function DAOPanel() {
                           textAlign: 'center',
                           color: '#6b7280',
                         }}>
-                          ✓ Oy kullandınız
+                          ✓ You already voted
                         </div>
                       )}
 
@@ -633,7 +633,7 @@ export function DAOPanel() {
                             opacity: executing === proposal.id ? 0.7 : 1,
                           }}
                         >
-                          ⚡ Yürüt
+                          ⚡ Execute
                         </button>
                       )}
                     </div>
@@ -648,14 +648,14 @@ export function DAOPanel() {
       {/* Pending Profiles (No Proposal Yet) */}
       <div>
         <h3 style={{ fontSize: '18px', marginBottom: '16px', color: '#1f2937' }}>
-          Öneri Bekleyen Başvurular ({pendingProfiles.length})
+          Applications Awaiting Proposal ({pendingProfiles.length})
         </h3>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>Yükleniyor...</div>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>Loading...</div>
         ) : pendingProfiles.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
-            Öneri bekleyen başvuru bulunmuyor
+            No applications awaiting proposal
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -693,10 +693,10 @@ export function DAOPanel() {
                 <div style={{ padding: '20px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
                     <div style={{ fontSize: '14px' }}>
-                      <span style={{ color: '#6b7280' }}>Telefon:</span> {profile.phone || '-'}
+                      <span style={{ color: '#6b7280' }}>Phone:</span> {profile.phone || '-'}
                     </div>
                     <div style={{ fontSize: '14px' }}>
-                      <span style={{ color: '#6b7280' }}>Aile:</span> {profile.familySize} kişi
+                      <span style={{ color: '#6b7280' }}>Family:</span> {profile.familySize} people
                     </div>
                   </div>
 
@@ -722,7 +722,7 @@ export function DAOPanel() {
                         marginBottom: '16px',
                       }}
                     >
-                      📷 Kanıt Fotoğrafını Görüntüle 
+                      📷 View Evidence Photo 
                     </a>
                   )}
 
@@ -742,7 +742,7 @@ export function DAOPanel() {
                       opacity: creatingProposal === profile.id ? 0.7 : 1,
                     }}
                   >
-                    {creatingProposal === profile.id ? 'Oluşturuluyor...' : '📝 Öneri Oluştur'}
+                    {creatingProposal === profile.id ? 'Creating...' : '📝 Create Proposal'}
                   </button>
                 </div>
               </div>

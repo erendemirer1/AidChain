@@ -14,18 +14,18 @@ module aidchain::aidchain {
     // CONSTANTS
     // ============================================
     
-    /// Yardım paketinin durumları
+    /// Aid package status codes
     const STATUS_CREATED: u8 = 0;
     const STATUS_IN_TRANSIT: u8 = 1;
     const STATUS_DELIVERED: u8 = 2;
 
-    /// Proposal durumları
+    /// Proposal status codes
     const PROPOSAL_PENDING: u8 = 0;
     const PROPOSAL_APPROVED: u8 = 1;
     const PROPOSAL_REJECTED: u8 = 2;
     const PROPOSAL_EXPIRED: u8 = 3;
 
-    /// Hata kodları
+    /// Error codes
     const E_NOT_AUTHORIZED: u64 = 1;
     const E_INVALID_STATUS: u64 = 2;
     const E_NOT_DONOR: u64 = 3;
@@ -38,7 +38,7 @@ module aidchain::aidchain {
     const E_NOT_APPROVED: u64 = 10;
     const E_NOT_VERIFIER: u64 = 11;
     const E_ALREADY_VERIFIER: u64 = 12;
-    // V8: E_VERIFIER_NOT_FOUND ve E_CANNOT_REMOVE_ADMIN kaldırıldı (verifier çıkarma yok)
+    // V8: Removed verifier removal
     const E_ALREADY_VOTED: u64 = 15;
     const E_PROPOSAL_EXPIRED: u64 = 16;
     const E_PROPOSAL_NOT_PENDING: u64 = 17;
@@ -49,26 +49,26 @@ module aidchain::aidchain {
     const E_PROPOSAL_EXISTS: u64 = 22;
     const E_ADMIN_CANNOT_REGISTER: u64 = 23;
 
-    /// Minimum teslim süresi (epoch cinsinden)
+    /// Minimum delivery time (in epochs)
     const MIN_DELIVERY_EPOCHS: u64 = 0;
 
-    /// DAO varsayılan ayarları
+    /// DAO default settings
     const DEFAULT_VOTING_PERIOD: u64 = 10;     // 10 epoch (~10 dakika testnet)
-    const DEFAULT_QUORUM_PERCENT: u64 = 50;    // %50 katılım
-    const DEFAULT_APPROVAL_PERCENT: u64 = 60;  // %60 onay
+    const DEFAULT_QUORUM_PERCENT: u64 = 50;    // 50% quorum
+    const DEFAULT_APPROVAL_PERCENT: u64 = 60;  // 60% approval
 
     // ============================================
-    // V6: DAO OYLAMA SİSTEMİ
+    // DAO VOTING SYSTEM
     // ============================================
 
-    /// DAO Konfigürasyonu
+    /// DAO Configuration
     public struct DAOConfig has store, copy, drop {
         voting_period_epochs: u64,
         quorum_percent: u64,
         approval_percent: u64,
     }
 
-    /// Tüm yardım paketlerinin ID'lerini tutan global registry
+    /// Global registry for all aid packages
     public struct AidRegistry has key {
         id: UID,
         admin: address,
@@ -76,13 +76,13 @@ module aidchain::aidchain {
         packages: vector<ID>,
         recipient_profiles: vector<ID>,
         proposals: vector<ID>,
-        profiles_with_proposals: vector<ID>,  // V10: Aktif proposal'ı olan profiller
+        profiles_with_proposals: vector<ID>,  // V10: Profiles with active proposals
         dao_config: DAOConfig,
         total_donations: u64,
         total_delivered: u64,
     }
 
-    /// Alıcı doğrulama önerisi (Proposal)
+    /// Recipient verification proposal (Proposal)
     public struct VerificationProposal has key {
         id: UID,
         profile_id: ID,
@@ -97,7 +97,7 @@ module aidchain::aidchain {
         execution_epoch: Option<u64>,
     }
 
-    /// Yardım almaya ihtiyacı olan kişinin profili
+    /// Profile of a person in need of aid
     public struct RecipientProfile has key {
         id: UID,
         recipient: address,
@@ -110,16 +110,16 @@ module aidchain::aidchain {
         received_packages_count: u64,
         tc_hash: String,
         phone: String,
-        residence_blob_id: String,        // İkametgah belgesi (Walrus)
+        residence_blob_id: String,        // Residence document (Walrus)
         income_blob_id: String,           // Gelir belgesi (Walrus)
-        extra_document_blob_id: String,   // Ekstra belge (Walrus) - sağlık raporu, engellilik belgesi vb.
+        extra_document_blob_id: String,   // Extra document (Walrus) - health report, disability certificate etc.
         family_size: u64,
         description: String,
         proposal_id: Option<ID>,
         votes_received: u64,
     }
 
-    /// Yardım paketi
+    /// Aid package
     public struct AidPackage has key {
         id: UID,
         donor: address,
@@ -181,7 +181,7 @@ module aidchain::aidchain {
         epoch: u64,
     }
 
-    // V8: VerifierRemoved kaldırıldı - bir kez eklenen verifier çıkarılamaz
+    // V8: VerifierRemoved removed - verifiers cannot be removed once added
 
     public struct RecipientVerified has copy, drop {
         profile_id: ID,
@@ -227,10 +227,10 @@ module aidchain::aidchain {
     }
 
     // ============================================
-    // ADMIN FONKSİYONLARI
+    // ADMIN FUNCTIONS
     // ============================================
 
-    /// İlk registry'yi oluşturur
+    /// Creates the initial registry
     public entry fun init_registry(ctx: &mut TxContext) {
         let sender = tx_context::sender(ctx);
 
@@ -259,7 +259,7 @@ module aidchain::aidchain {
         transfer::share_object(registry);
     }
 
-    /// DAO config güncelle (sadece admin)
+    /// Update DAO config (admin only)
     public entry fun update_dao_config(
         registry: &mut AidRegistry,
         voting_period: u64,
@@ -338,15 +338,15 @@ module aidchain::aidchain {
         });
     }
 
-    // V8: remove_verifier kaldırıldı - Bir kez eklenen verifier blockchain'den çıkarılamaz
-    // Bu güvenlik açısından önemli: Admin bile keyfi olarak DAO üyelerini çıkaramaz
+    // V8: remove_verifier removed - Verifiers cannot be removed from blockchain
+    // Security: Admin cannot arbitrarily remove DAO members
 
     // ============================================
-    // DAO OYLAMA FONKSİYONLARI
+    // DAO VOTING FUNCTIONS
     // ============================================
 
-    /// Alıcı doğrulama önerisi oluştur (herhangi bir verifier)
-    /// V10: profile sadece okunuyor, aktif proposal kontrolü registry'den yapılıyor
+    /// Create recipient verification proposal (any verifier)
+    /// V10: profile is read-only, active proposal check from registry
     public entry fun create_verification_proposal(
         registry: &mut AidRegistry,
         profile: &RecipientProfile,
@@ -355,10 +355,10 @@ module aidchain::aidchain {
         let sender = tx_context::sender(ctx);
         assert_verifier(registry, sender);
         
-        // Zaten doğrulanmış mı?
+        // Already verified?
         assert!(!profile.is_verified, E_ALREADY_DELIVERED);
         
-        // Zaten aktif proposal var mı? (V10: registry'den kontrol)
+        // Already has active proposal? (V10: check from registry)
         let profile_id = object::id(profile);
         assert!(!vector::contains(&registry.profiles_with_proposals, &profile_id), E_PROPOSAL_EXISTS);
 
@@ -402,7 +402,7 @@ module aidchain::aidchain {
         transfer::share_object(proposal);
     }
 
-    /// Öneri için oy ver
+    /// Vote on proposal
     public entry fun vote_on_proposal(
         registry: &AidRegistry,
         proposal: &mut VerificationProposal,
@@ -412,16 +412,16 @@ module aidchain::aidchain {
         let sender = tx_context::sender(ctx);
         let current_epoch = tx_context::epoch(ctx);
         
-        // Verifier kontrolü
+        // Verifier check
         assert_verifier(registry, sender);
         
-        // Proposal durumu kontrolü
+        // Proposal status check
         assert!(proposal.status == PROPOSAL_PENDING, E_PROPOSAL_NOT_PENDING);
         
-        // Süre kontrolü
+        // Time check
         assert!(current_epoch <= proposal.expires_at_epoch, E_PROPOSAL_EXPIRED);
         
-        // Daha önce oy kullanmış mı?
+        // Already voted?
         let already_voted_for = vector::contains(&proposal.votes_for, &sender);
         let already_voted_against = vector::contains(&proposal.votes_against, &sender);
         assert!(!already_voted_for && !already_voted_against, E_ALREADY_VOTED);
@@ -443,7 +443,7 @@ module aidchain::aidchain {
         });
     }
 
-    /// Öneriyi yürüt (quorum ve çoğunluk sağlandıysa)
+    /// Execute proposal (if quorum and majority met)
     public entry fun execute_proposal(
         registry: &mut AidRegistry,
         proposal: &mut VerificationProposal,
@@ -452,10 +452,10 @@ module aidchain::aidchain {
     ) {
         let current_epoch = tx_context::epoch(ctx);
         
-        // Zaten yürütülmüş mü?
+        // Already executed?
         assert!(!proposal.executed, E_ALREADY_EXECUTED);
         
-        // Profile ID eşleşmesi
+        // Profile ID match
         assert!(object::id(profile) == proposal.profile_id, E_INVALID_RECIPIENT);
 
         let total_verifiers = vector::length(&registry.verifiers);
@@ -463,25 +463,25 @@ module aidchain::aidchain {
         let votes_against = vector::length(&proposal.votes_against);
         let total_votes = votes_for + votes_against;
 
-        // Quorum kontrolü (en az 1 oy gerekli)
+        // Quorum check (at least 1 vote required)
         let quorum_threshold = if (total_verifiers == 0) { 1 } else {
             let threshold = (total_verifiers * registry.dao_config.quorum_percent) / 100;
             if (threshold == 0) { 1 } else { threshold }
         };
         let quorum_met = total_votes >= quorum_threshold;
 
-        // Süre dolmuş mu?
+        // Time expired?
         let expired = current_epoch > proposal.expires_at_epoch;
 
         // Karar ver
         let approved: bool;
         
         if (expired && !quorum_met) {
-            // Süre doldu ve quorum sağlanamadı
+            // Time expired and quorum not met
             proposal.status = PROPOSAL_EXPIRED;
             approved = false;
         } else if (quorum_met) {
-            // Quorum sağlandı, çoğunluğa bak
+            // Quorum met, check majority
             let approval_threshold = if (total_votes == 0) { 1 } else {
                 let threshold = (total_votes * registry.dao_config.approval_percent) / 100;
                 if (threshold == 0) { 1 } else { threshold }
@@ -491,7 +491,7 @@ module aidchain::aidchain {
                 proposal.status = PROPOSAL_APPROVED;
                 approved = true;
                 
-                // Profile'ı doğrula
+                // Verify profile
                 profile.is_verified = true;
                 profile.verified_at_epoch = option::some(current_epoch);
                 profile.votes_received = votes_for;
@@ -501,7 +501,7 @@ module aidchain::aidchain {
                 approved = false;
             }
         } else {
-            // Henüz quorum yok ve süre dolmadı
+            // Quorum not yet met and time not expired
             assert!(false, E_QUORUM_NOT_MET);
             approved = false;
         };
@@ -509,7 +509,7 @@ module aidchain::aidchain {
         proposal.executed = true;
         proposal.execution_epoch = option::some(current_epoch);
         
-        // V10: Registry'den profile'ı kaldır (proposal_id yerine)
+        // V10: Remove profile from registry
         let profile_id = object::id(profile);
         let (found, idx) = vector::index_of(&registry.profiles_with_proposals, &profile_id);
         if (found) {
@@ -545,7 +545,7 @@ module aidchain::aidchain {
         )
     }
 
-    /// Quorum kontrolü
+    /// Quorum check (at least 1 vote required)
     public fun check_quorum(registry: &AidRegistry, proposal: &VerificationProposal): bool {
         let total_verifiers = vector::length(&registry.verifiers);
         let total_votes = vector::length(&proposal.votes_for) + vector::length(&proposal.votes_against);
@@ -578,7 +578,7 @@ module aidchain::aidchain {
     }
 
     // ============================================
-    // RECIPIENT KAYIT FONKSİYONLARI
+    // RECIPIENT REGISTRATION FUNCTIONS
     // ============================================
 
     public entry fun register_recipient(
@@ -597,7 +597,7 @@ module aidchain::aidchain {
         let sender = tx_context::sender(ctx);
         let current_epoch = tx_context::epoch(ctx);
 
-        // Admin veya verifier başvuru yapamaz
+        // Admin or verifier cannot apply
         let is_admin_or_verifier = is_verifier(registry, sender);
         assert!(!is_admin_or_verifier, E_ADMIN_CANNOT_REGISTER);
 
@@ -629,7 +629,7 @@ module aidchain::aidchain {
     }
 
     // ============================================
-    // YARDIM PAKETİ FONKSİYONLARI
+    // AID PACKAGE FUNCTIONS
     // ============================================
 
     public entry fun create_aid_package(
@@ -670,7 +670,7 @@ module aidchain::aidchain {
         transfer::share_object(aid_package);
     }
 
-    /// Paketi doğrulanmış alıcıya ata
+    /// Assign package to verified recipient
     public entry fun assign_recipient(
         aid_package: &mut AidPackage,
         profile: &RecipientProfile,
@@ -694,7 +694,7 @@ module aidchain::aidchain {
         });
     }
 
-    /// Teslim edildi olarak işaretle
+    /// Mark as delivered
     public entry fun mark_delivered(
         aid_package: &mut AidPackage,
         delivery_note: vector<u8>,
@@ -727,7 +727,7 @@ module aidchain::aidchain {
         });
     }
 
-    /// Koordinatör onayı
+    /// Coordinator approval
     public entry fun coordinator_approve(
         aid_package: &mut AidPackage,
         ctx: &mut TxContext
@@ -747,7 +747,7 @@ module aidchain::aidchain {
         });
     }
 
-    /// Fonları serbest bırak
+    /// Release funds
     public entry fun release_funds(
         registry: &mut AidRegistry,
         aid_package: &mut AidPackage,
@@ -776,7 +776,7 @@ module aidchain::aidchain {
         transfer::public_transfer(donation, recipient);
     }
 
-    /// Bağışı iade et
+    /// Refund donation
     public entry fun refund_donation(
         registry: &mut AidRegistry,
         aid_package: &mut AidPackage,
@@ -805,7 +805,7 @@ module aidchain::aidchain {
     }
 
     // ============================================
-    // VIEW FONKSİYONLARI
+    // VIEW FUNCTIONS
     // ============================================
 
     public fun get_registry_stats(registry: &AidRegistry): (u64, u64, u64, u64) {

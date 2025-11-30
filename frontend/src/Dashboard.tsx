@@ -206,7 +206,7 @@ export function Dashboard() {
       <div className="card">
         <h2>Dashboard</h2>
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
-          İstatistikler yükleniyor...
+          Loading statistics...
         </div>
       </div>
     );
@@ -224,7 +224,7 @@ export function Dashboard() {
         <div>
           <h2 style={{ margin: 0, fontSize: '24px', color: '#111827' }}>Dashboard</h2>
           <p style={{ margin: '4px 0 0', fontSize: '14px', color: '#6b7280' }}>
-            AidChain platform istatistikleri
+            AidChain platform statistics
           </p>
         </div>
         <button 
@@ -232,7 +232,7 @@ export function Dashboard() {
           className="btn-primary" 
           style={{ padding: '10px 20px' }}
         >
-          Yenile
+          Refresh
         </button>
       </div>
 
@@ -244,32 +244,32 @@ export function Dashboard() {
         marginBottom: '32px',
       }}>
         <StatCard
-          title="Toplam Bağış"
+          title="Total Donations"
           value={`${formatSUI(stats.totalDonations)} SUI`}
           icon={<svg width="24" height="24" fill="none" stroke="#059669" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
           color="#dcfce7"
-          subtitle="Tüm zamanlar"
+          subtitle="All time"
         />
         <StatCard
-          title="Toplam Alıcı"
+          title="Total Recipients"
           value={stats.totalRecipients}
           icon={<svg width="24" height="24" fill="none" stroke="#4f46e5" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>}
           color="#e0e7ff"
-          subtitle={`${stats.verifiedRecipients} onaylı`}
+          subtitle={`${stats.verifiedRecipients} verified`}
         />
         <StatCard
-          title="Yardım Paketleri"
+          title="Aid Packages"
           value={stats.totalPackages}
           icon={<svg width="24" height="24" fill="none" stroke="#d97706" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>}
           color="#fef3c7"
-          subtitle={`${stats.deliveredPackages} teslim edildi`}
+          subtitle={`${stats.deliveredPackages} delivered`}
         />
         <StatCard
-          title="DAO Üyeleri"
+          title="DAO Members"
           value={stats.totalVerifiers + 1}
           icon={<svg width="24" height="24" fill="none" stroke="#db2777" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/></svg>}
           color="#fce7f3"
-          subtitle="Admin + Verifier'lar"
+          subtitle="Admin + Verifiers"
         />
       </div>
 
@@ -288,16 +288,16 @@ export function Dashboard() {
           border: '1px solid #e5e7eb',
         }}>
           <h3 style={{ margin: '0 0 20px', fontSize: '16px', color: '#111827' }}>
-            Alıcı Durumu
+            Recipient Status
           </h3>
           <ProgressBar
-            label="Onaylı Alıcılar"
+            label="Verified Recipients"
             value={stats.verifiedRecipients}
             max={stats.totalRecipients}
             color="#10b981"
           />
           <ProgressBar
-            label="Bekleyen Başvurular"
+            label="Pending Applications"
             value={stats.pendingRecipients}
             max={stats.totalRecipients}
             color="#f59e0b"
@@ -313,16 +313,16 @@ export function Dashboard() {
           border: '1px solid #e5e7eb',
         }}>
           <h3 style={{ margin: '0 0 20px', fontSize: '16px', color: '#111827' }}>
-            Paket Durumu
+            Package Status
           </h3>
           <ProgressBar
-            label="Teslim Edilenler"
+            label="Delivered"
             value={stats.deliveredPackages}
             max={stats.totalPackages}
             color="#10b981"
           />
           <ProgressBar
-            label="Devam Edenler"
+            label="In Progress"
             value={stats.totalPackages - stats.deliveredPackages}
             max={stats.totalPackages}
             color="#3b82f6"
@@ -343,7 +343,7 @@ export function Dashboard() {
           padding: '20px',
           color: 'white',
         }}>
-          <div style={{ fontSize: '14px', opacity: 0.9 }}>Onay Oranı</div>
+          <div style={{ fontSize: '14px', opacity: 0.9 }}>Approval Rate</div>
           <div style={{ fontSize: '28px', fontWeight: '700', marginTop: '8px' }}>
             {stats.totalRecipients > 0 
               ? `${Math.round((stats.verifiedRecipients / stats.totalRecipients) * 100)}%`
@@ -357,7 +357,7 @@ export function Dashboard() {
           padding: '20px',
           color: 'white',
         }}>
-          <div style={{ fontSize: '14px', opacity: 0.9 }}>Teslimat Oranı</div>
+          <div style={{ fontSize: '14px', opacity: 0.9 }}>Delivery Rate</div>
           <div style={{ fontSize: '28px', fontWeight: '700', marginTop: '8px' }}>
             {stats.totalPackages > 0 
               ? `${Math.round((stats.deliveredPackages / stats.totalPackages) * 100)}%`
@@ -371,7 +371,7 @@ export function Dashboard() {
           padding: '20px',
           color: 'white',
         }}>
-          <div style={{ fontSize: '14px', opacity: 0.9 }}>Ortalama Bağış</div>
+          <div style={{ fontSize: '14px', opacity: 0.9 }}>Average Donation</div>
           <div style={{ fontSize: '28px', fontWeight: '700', marginTop: '8px' }}>
             {stats.totalPackages > 0 
               ? `${formatSUI(stats.totalDonations / stats.totalPackages)} SUI`
@@ -414,7 +414,7 @@ export function Dashboard() {
               textDecoration: 'none',
             }}
           >
-            SuiVision'da Görüntüle
+            View on SuiVision
           </a>
         </div>
       </div>

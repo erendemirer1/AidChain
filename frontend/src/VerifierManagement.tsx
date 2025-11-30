@@ -47,19 +47,19 @@ export function VerifierManagement() {
 
   const handleAddVerifier = async () => {
     if (!newVerifierAddress.trim()) {
-      setMessage('Lütfen bir adres girin');
+      setMessage('Please enter an address');
       return;
     }
 
     // Validate address format
     if (!newVerifierAddress.startsWith('0x') || newVerifierAddress.length !== 66) {
-      setMessage('Geçersiz adres formatı (0x ile başlamalı, 66 karakter olmalı)');
+      setMessage('Invalid address format (must start with 0x, 66 characters)');
       return;
     }
 
     // Check if already a verifier
     if (verifiers.some(v => v.toLowerCase() === newVerifierAddress.toLowerCase())) {
-      setMessage('Bu adres zaten bir DAO üyesi');
+      setMessage('This address is already a DAO member');
       return;
     }
 
@@ -91,20 +91,20 @@ export function VerifierManagement() {
             });
 
             if (status.effects?.status?.status === 'success') {
-              setMessage('DAO üyesi başarıyla eklendi!');
+              setMessage('DAO member successfully added!');
               setNewVerifierAddress('');
               loadRegistryData();
             } else {
-              setMessage('İşlem başarısız oldu');
+              setMessage('Transaction failed');
             }
           },
           onError: (error) => {
-            setMessage(`Hata: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
           },
         }
       );
     } catch (error) {
-      setMessage(`Hata: ${(error as Error).message}`);
+      setMessage(`Error: ${(error as Error).message}`);
     } finally {
       setAdding(false);
     }
@@ -117,9 +117,9 @@ export function VerifierManagement() {
   if (loading) {
     return (
       <div className="card">
-        <h2>DAO Üye Yönetimi</h2>
+        <h2>DAO Member Management</h2>
         <div style={{ textAlign: 'center', padding: '60px 20px', color: '#718096' }}>
-          Yükleniyor...
+          Loading...
         </div>
       </div>
     );
@@ -128,7 +128,7 @@ export function VerifierManagement() {
   if (!currentAccount) {
     return (
       <div className="card">
-        <h2>DAO Üye Yönetimi</h2>
+        <h2>DAO Member Management</h2>
         <div style={{
           padding: '40px',
           textAlign: 'center',
@@ -138,7 +138,7 @@ export function VerifierManagement() {
         }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}></div>
           <div style={{ fontSize: '16px', fontWeight: '500' }}>
-            Lütfen cüzdanınızı bağlayın
+            Please connect your wallet
           </div>
         </div>
       </div>
@@ -148,7 +148,7 @@ export function VerifierManagement() {
   if (!isAdmin) {
     return (
       <div className="card">
-        <h2>DAO Üye Yönetimi</h2>
+        <h2>DAO Member Management</h2>
         
         <div style={{
           padding: '24px',
@@ -165,11 +165,11 @@ export function VerifierManagement() {
           }}>
             <span style={{ fontSize: '24px' }}>🔒</span>
             <div style={{ fontWeight: '600', color: '#991b1b', fontSize: '16px' }}>
-              Yetkisiz Erişim
+              Unauthorized Access
             </div>
           </div>
           <div style={{ fontSize: '14px', color: '#b91c1c' }}>
-            Bu panel sadece admin tarafından görüntülenebilir.
+            This panel can only be viewed by admin.
           </div>
         </div>
 
@@ -180,7 +180,7 @@ export function VerifierManagement() {
           border: '1px solid #e2e8f0',
         }}>
           <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '8px' }}>
-            Admin Adresi:
+            Admin Address:
           </div>
           <code style={{
             display: 'block',
@@ -191,11 +191,11 @@ export function VerifierManagement() {
             wordBreak: 'break-all',
             color: '#334155',
           }}>
-            {registryAdmin || 'Yükleniyor...'}
+            {registryAdmin || 'Loading...'}
           </code>
           
           <div style={{ fontSize: '13px', color: '#64748b', marginTop: '16px', marginBottom: '8px' }}>
-            Sizin Adresiniz:
+            Your Address:
           </div>
           <code style={{
             display: 'block',
@@ -221,13 +221,13 @@ export function VerifierManagement() {
         alignItems: 'center', 
         marginBottom: '24px' 
       }}>
-        <h2 style={{ margin: 0 }}>DAO Üye Yönetimi</h2>
+        <h2 style={{ margin: 0 }}>DAO Member Management</h2>
         <button 
           onClick={loadRegistryData} 
           className="btn-primary" 
           style={{ padding: '10px 20px' }}
         >
-          Yenile
+          Refresh
         </button>
       </div>
 
@@ -243,7 +243,7 @@ export function VerifierManagement() {
       }}>
         <span></span>
         <span style={{ fontSize: '14px', fontWeight: '500', color: '#166534' }}>
-          Admin olarak giriş yaptınız
+          Logged in as Admin
         </span>
       </div>
 
@@ -252,9 +252,9 @@ export function VerifierManagement() {
           padding: '16px',
           borderRadius: '12px',
           marginBottom: '24px',
-          background: message.includes('başarıyla') ? '#dcfce7' : '#fef2f2',
-          color: message.includes('başarıyla') ? '#166534' : '#991b1b',
-          border: `1px solid ${message.includes('başarıyla') ? '#86efac' : '#fecaca'}`,
+          background: message.includes('success') ? '#dcfce7' : '#fef2f2',
+          color: message.includes('success') ? '#166534' : '#991b1b',
+          border: `1px solid ${message.includes('success') ? '#86efac' : '#fecaca'}`,
         }}>
           {message}
         </div>
@@ -277,10 +277,10 @@ export function VerifierManagement() {
           <span style={{ fontSize: '24px' }}>➕</span>
           <div>
             <div style={{ fontWeight: '600', color: '#0369a1', fontSize: '16px' }}>
-              Yeni DAO Üyesi Ekle
+              Add New DAO Member
             </div>
             <div style={{ fontSize: '13px', color: '#0284c7', marginTop: '2px' }}>
-              Eklenen üyeler blockchain'de kalıcıdır ve çıkarılamaz
+              Added members are permanent on blockchain and cannot be removed
             </div>
           </div>
         </div>
@@ -290,7 +290,7 @@ export function VerifierManagement() {
             type="text"
             value={newVerifierAddress}
             onChange={(e) => setNewVerifierAddress(e.target.value)}
-            placeholder="0x... (Sui adresi)"
+            placeholder="0x... (Sui address)"
             style={{
               flex: 1,
               padding: '14px 16px',
@@ -316,7 +316,7 @@ export function VerifierManagement() {
               whiteSpace: 'nowrap',
             }}
           >
-            {adding ? 'Ekleniyor...' : 'Ekle'}
+            {adding ? 'Adding...' : 'Add'}
           </button>
         </div>
 
@@ -328,8 +328,8 @@ export function VerifierManagement() {
           fontSize: '12px',
           color: '#075985',
         }}>
-          <strong>Dikkat:</strong> DAO üyeleri bir kez eklendiğinde blockchain'den çıkarılamaz. 
-          Bu güvenlik önlemi, admin'in keyfi olarak üyeleri çıkarmasını engeller.
+          <strong>Warning:</strong> DAO members cannot be removed from blockchain once added. 
+          This security measure prevents admin from arbitrarily removing members.
         </div>
       </div>
 
@@ -344,10 +344,10 @@ export function VerifierManagement() {
           <span style={{ fontSize: '24px' }}></span>
           <div>
             <div style={{ fontWeight: '600', color: '#374151', fontSize: '16px' }}>
-              Mevcut DAO Üyeleri
+              Current DAO Members
             </div>
             <div style={{ fontSize: '13px', color: '#6b7280' }}>
-              Toplam {verifiers.length + 1} üye (Admin dahil)
+              Total {verifiers.length + 1} members (including Admin)
             </div>
           </div>
         </div>
@@ -367,7 +367,7 @@ export function VerifierManagement() {
               <span style={{ fontSize: '20px' }}></span>
               <div>
                 <div style={{ fontWeight: '600', color: '#92400e', fontSize: '14px' }}>
-                  Admin (Kurucu)
+                  Admin (Founder)
                 </div>
                 <code style={{ fontSize: '12px', color: '#a16207' }}>
                   {shortenAddress(registryAdmin || '')}
@@ -396,7 +396,7 @@ export function VerifierManagement() {
               color: '#94a3b8',
             }}>
               <div style={{ fontSize: '32px', marginBottom: '8px' }}>📭</div>
-              <div>Henüz DAO üyesi eklenmemiş</div>
+              <div>No DAO members added yet</div>
             </div>
           ) : (
             verifiers.map((verifier, index) => (
@@ -429,7 +429,7 @@ export function VerifierManagement() {
                   </span>
                   <div>
                     <div style={{ fontWeight: '500', color: '#374151', fontSize: '14px' }}>
-                      DAO Üyesi #{index + 1}
+                      DAO Member #{index + 1}
                     </div>
                     <code style={{ fontSize: '12px', color: '#6b7280' }}>
                       {shortenAddress(verifier)}
@@ -444,7 +444,7 @@ export function VerifierManagement() {
                   fontWeight: '600',
                   color: '#4f46e5',
                 }}>
-                  VERİFİER
+                  VERIFIER
                 </div>
               </div>
             ))
@@ -461,7 +461,7 @@ export function VerifierManagement() {
         border: '1px solid #e2e8f0',
       }}>
         <div style={{ fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
-          DAO Üyeleri Hakkında
+          About DAO Members
         </div>
         <ul style={{ 
           margin: 0, 
@@ -470,10 +470,10 @@ export function VerifierManagement() {
           color: '#64748b',
           lineHeight: '1.8',
         }}>
-          <li>DAO üyeleri (verifier'lar) yardım başvurularını onaylayabilir</li>
-          <li>Üyeler blockchain'de kalıcı olarak kaydedilir</li>
-          <li>Bir kez eklenen üye çıkarılamaz (güvenlik önlemi)</li>
-          <li>Sadece admin yeni üye ekleyebilir</li>
+          <li>DAO members (verifiers) can approve aid applications</li>
+          <li>Members are permanently recorded on blockchain</li>
+          <li>Once added, members cannot be removed (security measure)</li>
+          <li>Only admin can add new members</li>
         </ul>
       </div>
     </div>
